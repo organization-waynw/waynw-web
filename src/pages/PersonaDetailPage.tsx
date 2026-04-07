@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, CreditCard as Edit2, X } from "lucide-react";
+import { ChevronLeft, CreditCard as Edit2, X, Plus } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { personas } from "../data/personas";
 import { episodes, disks, DiskName } from "../data/episodes";
@@ -39,6 +39,18 @@ function PersonaDetailPage() {
   const personaEpisodes = useMemo(() => {
     return episodes.filter((ep) => ep.persona_id === id);
   }, [id]);
+
+  //esc 뒤로가기 함수
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        navigate("/main");
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [navigate]);
 
   const filteredEpisodes = useMemo(() => {
     let filtered = personaEpisodes;
@@ -81,6 +93,11 @@ function PersonaDetailPage() {
 
   // 현재 표시할 프로필 이미지
   const displayImg = editedProfileImg ?? persona.profile_img_path ?? null;
+
+  //에피소드 생성 패이지 이동 함수
+  const handleGoCreateEpisode = () => {
+    navigate(`/persona/${id}/episode/create`);
+  };
 
   return (
     <div className="min-h-screen bg-[#ECF0F9]">
@@ -370,7 +387,17 @@ function PersonaDetailPage() {
 
         {/* ── 하단: 에피소드 섹션 */}
         <div className="p-8 bg-white shadow-sm rounded-2xl">
-          <h3 className="text-lg font-bold text-[#0F1C46] mb-6">에피소드</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-bold text-[#0F1C46] mb-6">에피소드</h3>
+            <button
+              onClick={handleGoCreateEpisode}
+              className="p-2 transition-colors rounded-full hover:bg-gray-100"
+              style={{ color: "#587CF0" }}
+              aria-label="Create new room"
+            >
+              <Plus size={24} />
+            </button>
+          </div>
 
           <div className="space-y-6">
             <div>
@@ -450,7 +477,9 @@ function PersonaDetailPage() {
                     <div
                       key={episode.id}
                       className="flex flex-col items-center cursor-pointer group"
-                      onClick={() => navigate(`/episode/${episode.id}`)}
+                      onClick={() =>
+                        navigate(`/persona/${id}/episode/${episode.id}`)
+                      }
                     >
                       <div className="relative w-20 h-20">
                         <div

@@ -1,20 +1,42 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { personas } from "../data/personas";
 import Header from "../components/Header";
+import ChatOverlay from "../components/MainPage/ChatOverlay";
 
 function MainPage() {
   const navigate = useNavigate();
+  const clickTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeChatPersona, setActiveChatPersona] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   const filteredPersonas = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return personas;
-    }
-    return personas.filter((persona) =>
-      persona.name.toLowerCase().includes(searchQuery.toLowerCase()),
+    if (!searchQuery.trim()) return personas;
+    return personas.filter((p) =>
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [searchQuery]);
+
+  const handleClick = (persona: { id: string; name: string }) => {
+    if (clickTimeout.current) return;
+
+    clickTimeout.current = setTimeout(() => {
+      setActiveChatPersona({ id: persona.id, name: persona.name });
+      clickTimeout.current = null;
+    }, 200); // 더블클릭 판별 시간
+  };
+
+  const handleDoubleClick = (id: string) => {
+    if (clickTimeout.current) {
+      clearTimeout(clickTimeout.current);
+      clickTimeout.current = null;
+    }
+    navigate(`/persona/${id}`);
+  };
 
   return (
     <div className="min-h-screen bg-[#ECF0F9]">
@@ -30,7 +52,8 @@ function MainPage() {
             {filteredPersonas.map((persona) => (
               <div
                 key={persona.id}
-                onClick={() => navigate(`/persona/${persona.id}`)}
+                onClick={() => handleClick(persona)}
+                onDoubleClick={() => handleDoubleClick(persona.id)}
                 className="hover:scale-[1.02] active:scale-[0.98] overflow-hidden transition-shadow bg-white shadow-sm cursor-pointer rounded-2xl hover:shadow-md"
               >
                 <div className="p-6">
@@ -65,6 +88,13 @@ function MainPage() {
           </div>
         )}
       </main>
+
+      {activeChatPersona && (
+        <ChatOverlay
+          personaName={activeChatPersona.name}
+          onClose={() => setActiveChatPersona(null)}
+        />
+      )}
     </div>
   );
 }

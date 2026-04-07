@@ -1,93 +1,55 @@
+// EpisodeCreatePage.tsx
+
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, X, Edit2, Check, Plus, Trash2, Save } from "lucide-react";
-import ReactMarkdown from "react-markdown";
+import { ChevronLeft, Check, Plus, Edit2, Trash2, Save } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
-import { episodes, episodeNodes, disks, EpisodeNode } from "../data/episodes";
+import { disks, EpisodeNode } from "../data/episodes";
 import {
   getDiskAnimationDelay,
   DISK_SPIN_DURATION,
 } from "../utils/diskAnimation";
 
-const DEFAULT_NODE_NAME = "새 노드";
-const DEFAULT_NODE_EXPLANATION = "한줄 설명을 입력해주세요";
-
 // ── 드래그 감지 임계값 (px): 이 값보다 많이 움직여야 드래그로 인식
 //    클릭과 드래그를 구분하는 기준입니다. 값을 높이면 더 많이 움직여야 드래그 시작
 const DRAG_THRESHOLD = 5;
 
-function EpisodeDetailpage() {
-  const { episodeId, id } = useParams<{ episodeId: string; id: string }>();
+const DEFAULT_NODE_NAME = "새 노드";
+const DEFAULT_NODE_EXPLANATION = "한줄 설명을 입력해주세요";
+
+const DISK_SIZE = 560;
+const DISK_VISIBLE = DISK_SIZE / 2;
+
+function EpisodeCreatePage() {
+  const { id: personaId } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const episode = episodes.find((e) => e.id === episodeId);
+  // ── 디스크 선택 (진입 시 필수)
+  const [selectedDiskId, setSelectedDiskId] = useState<string | null>(null);
+  const [isDiskModalOpen, setIsDiskModalOpen] = useState(true); // 진입 시 바로 오픈
 
-  const baseNodes = useMemo(
-    () => episodeNodes.filter((n) => n.episode_id === episodeId),
-    [episodeId],
-  );
+  const currentDisk = disks.find((d) => d.id === selectedDiskId);
+  const diskAnimationDelay = useMemo(() => getDiskAnimationDelay(), []);
 
-  const [nodes, setNodes] = useState<EpisodeNode[]>(baseNodes);
-  const [isDirty, setIsDirty] = useState(false);
+  // ── 에피소드 기본 정보
+  const [episodeName, setEpisodeName] = useState("");
+  const [episodeExplanation, setEpisodeExplanation] = useState("");
 
+  // ── 노드
+  const [nodes, setNodes] = useState<EpisodeNode[]>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<number | null>(null);
   const [isEditingNode, setIsEditingNode] = useState(false);
   const [editNodeName, setEditNodeName] = useState("");
   const [editNodeExplanation, setEditNodeExplanation] = useState("");
   const [editNodeContent, setEditNodeContent] = useState("");
 
-  const [isEditingEpisode, setIsEditingEpisode] = useState(false);
-  const [editEpisodeName, setEditEpisodeName] = useState(episode?.name ?? "");
-  const [editEpisodeExplanation, setEditEpisodeExplanation] = useState(
-    episode?.one_line_explanation ?? "",
-  );
-  const [displayName, setDisplayName] = useState(episode?.name ?? "");
-  const [displayExplanation, setDisplayExplanation] = useState(
-    episode?.one_line_explanation ?? "",
-  );
-
-  const [isDiskModalOpen, setIsDiskModalOpen] = useState(false);
-  const [selectedDiskId, setSelectedDiskId] = useState(episode?.disk_id ?? "");
+  // ── 디스크 호버
   const [isDiskHovered, setIsDiskHovered] = useState(false);
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const saveSoundRef = useRef<HTMLAudioElement | null>(null);
 
-  // ── 디스크 드래그 관련 state
-  const [isDragging, setIsDragging] = useState(false); // 드래그 중 여부
-  const [dragX, setDragX] = useState(0); // 디스크 수평 이동량 (px)
-  const [isOverSaveZone, setIsOverSaveZone] = useState(false); // 저장 영역 위에 있는지
-  const dragStartX = useRef<number>(0); // 드래그 시작 X 좌표
-  const hasDragged = useRef(false); // DRAG_THRESHOLD 초과 여부
-  const diskRef = useRef<HTMLDivElement>(null);
-  const saveZoneRef = useRef<HTMLDivElement>(null);
-
-  const justDropped = useRef(false);
-
-  const handleDiskMouseEnter = () => {
-    if (isDragging) return; // 드래그 중이면 호버 정보 모달 무시
-    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
-    setIsDiskHovered(true);
-  };
-
-  const handleDiskMouseLeave = () => {
-    hoverTimerRef.current = setTimeout(() => setIsDiskHovered(false), 150);
-  };
-
+  // ── 오디오
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useMemo(() => new Audio(), []);
-
-  //esc 뒤로 가기 함수
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        navigate(`/persona/${id}`);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [navigate, id]);
-
   useEffect(() => {
     return () => {
       audioRef.pause();
@@ -95,35 +57,35 @@ function EpisodeDetailpage() {
     };
   }, [audioRef]);
 
-  const [isEditingSubInfo, setIsEditingSubInfo] = useState(false);
-  const [editedSubInfo, setEditedSubInfo] = useState(episode?.sub_info ?? "");
-
-  const currentDisk = disks.find((d) => d.id === selectedDiskId);
-  const diskAnimationDelay = useMemo(() => getDiskAnimationDelay(), []);
-
-  // - 디스크 드래그, 사운드 등록
+  // ── 저장 사운드
+  const saveSoundRef = useRef<HTMLAudioElement | null>(null);
   useEffect(() => {
-    saveSoundRef.current = new Audio("/sounds/episode-submit.mp3");
+    saveSoundRef.current = new Audio("/sounds/save-click.mp3");
   }, []);
 
-  // ── 디스크 드래그: mousemove / mouseup을 window에 등록
+  // ── 드래그
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragX, setDragX] = useState(0);
+  const [isOverSaveZone, setIsOverSaveZone] = useState(false);
+  const dragStartX = useRef<number>(0);
+  const hasDragged = useRef(false);
+  const justDropped = useRef(false);
+  const diskRef = useRef<HTMLDivElement>(null);
+  const saveZoneRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (!isDragging) return;
 
     const handleMouseMove = (e: MouseEvent) => {
       const deltaX = e.clientX - dragStartX.current;
-
-      // DRAG_THRESHOLD 초과 시 드래그로 확정
       if (!hasDragged.current && Math.abs(deltaX) > DRAG_THRESHOLD) {
         hasDragged.current = true;
       }
       if (!hasDragged.current) return;
 
-      // 수평 이동량: 오른쪽으로만 드래그 (양수만 허용)
       const clampedX = Math.max(0, deltaX);
       setDragX(clampedX);
 
-      // 저장 영역 위인지 판단
       if (saveZoneRef.current) {
         const rect = saveZoneRef.current.getBoundingClientRect();
         const over =
@@ -162,50 +124,107 @@ function EpisodeDetailpage() {
     setIsDragging(true);
   };
 
-  // ── 저장 처리
+  const handleDiskMouseEnter = () => {
+    if (isDragging) return;
+    if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
+    setIsDiskHovered(true);
+  };
+
+  const handleDiskMouseLeave = () => {
+    hoverTimerRef.current = setTimeout(() => setIsDiskHovered(false), 150);
+  };
+
+  // ── 저장
   const handleSave = () => {
+    if (!episodeName.trim()) {
+      toast.error("에피소드 이름을 입력해주세요", {
+        style: {
+          borderRadius: "12px",
+          background: "#fff",
+          color: "#0F1C46",
+          fontSize: "14px",
+          border: "1px solid #fee2e2",
+        },
+        iconTheme: { primary: "#ef4444", secondary: "#fff" },
+      });
+      return;
+    }
+    if (!episodeExplanation.trim()) {
+      toast.error("에피소드 설명을 입력해주세요", {
+        style: {
+          borderRadius: "12px",
+          background: "#fff",
+          color: "#0F1C46",
+          fontSize: "14px",
+          border: "1px solid #fee2e2",
+        },
+        iconTheme: { primary: "#ef4444", secondary: "#fff" },
+      });
+      return;
+    }
+
     saveSoundRef.current?.play();
-    setIsDirty(false);
-    toast.success("저장에 성공하였습니다", {
+    toast.success("에피소드가 생성되었습니다", {
       style: {
         borderRadius: "12px",
         background: "#0F1C46",
         color: "#fff",
         fontSize: "14px",
       },
-      iconTheme: {
-        primary: "#0AA1F2",
-        secondary: "#fff",
-      },
+      iconTheme: { primary: "#0AA1F2", secondary: "#fff" },
     });
-    //navigate(`/persona/${id}`);
+
+    setTimeout(() => {
+      navigate(`/persona/${personaId}`);
+    }, 800);
   };
 
-  if (!episode) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-white">
-        <p className="text-gray-500">에피소드를 찾을 수 없습니다.</p>
-      </div>
-    );
-  }
-
-  const handleEpisodeSave = () => {
-    setDisplayName(editEpisodeName);
-    setDisplayExplanation(editEpisodeExplanation);
-    setIsEditingEpisode(false);
-    setIsDirty(true);
+  // ── 디스크 클릭 (음악)
+  const handleDiskClick = () => {
+    if (hasDragged.current || justDropped.current) {
+      justDropped.current = false;
+      return;
+    }
+    const musicUrl = (currentDisk as any)?.music_url as string | undefined;
+    if (!musicUrl) return;
+    if (isPlaying) {
+      audioRef.pause();
+      setIsPlaying(false);
+    } else {
+      if (audioRef.src !== musicUrl) {
+        audioRef.pause();
+        audioRef.src = musicUrl;
+        audioRef.currentTime = 0;
+      }
+      audioRef.play();
+      setIsPlaying(true);
+    }
   };
 
-  const handleEpisodeEditStart = () => {
-    setEditEpisodeName(displayName);
-    setEditEpisodeExplanation(displayExplanation);
-    setIsEditingEpisode(true);
+  // ── 디스크 선택 확정
+  const handleDiskSelect = (diskId: string) => {
+    setSelectedDiskId(diskId);
+    setIsDiskModalOpen(false);
+    // 디스크 변경 시 재생 중이면 교체
+    if (isPlaying) {
+      const newDisk = disks.find((d) => d.id === diskId);
+      const newUrl = (newDisk as any)?.music_url as string | undefined;
+      audioRef.pause();
+      if (newUrl) {
+        audioRef.src = newUrl;
+        audioRef.currentTime = 0;
+        audioRef.play();
+      } else {
+        setIsPlaying(false);
+      }
+    }
   };
 
+  // ── 노드 추가
   const handleAddNode = () => {
     const newNode: EpisodeNode = {
       id: Date.now(),
-      episode_id: episodeId ?? "",
+      episode_id: "",
       name: DEFAULT_NODE_NAME,
       one_line_explanation: DEFAULT_NODE_EXPLANATION,
       content: "",
@@ -219,6 +238,7 @@ function EpisodeDetailpage() {
     setIsEditingNode(true);
   };
 
+  // ── 노드 삭제
   const handleDeleteNode = (nodeId: number, e: React.MouseEvent) => {
     e.stopPropagation();
     setNodes((prev) => prev.filter((n) => n.id !== nodeId));
@@ -226,7 +246,6 @@ function EpisodeDetailpage() {
       setSelectedNodeId(null);
       setIsEditingNode(false);
     }
-    setIsDirty(true);
   };
 
   const handleNodeClick = (node: EpisodeNode) => {
@@ -260,7 +279,6 @@ function EpisodeDetailpage() {
       ),
     );
     setIsEditingNode(false);
-    setIsDirty(true);
   };
 
   const handleEditCancel = () => {
@@ -277,47 +295,6 @@ function EpisodeDetailpage() {
     setIsEditingNode(false);
   };
 
-  const handleDiskClick = () => {
-    if (hasDragged.current || justDropped.current) {
-      justDropped.current = false; // 플래그 초기화
-      return;
-    }
-    const musicUrl = (currentDisk as any)?.music_url as string | undefined;
-    if (!musicUrl) return;
-    if (isPlaying) {
-      audioRef.pause();
-      setIsPlaying(false);
-    } else {
-      if (audioRef.src !== musicUrl) {
-        audioRef.pause();
-        audioRef.src = musicUrl;
-        audioRef.currentTime = 0;
-      }
-      audioRef.play();
-      setIsPlaying(true);
-    }
-  };
-
-  const handleDiskChange = (diskId: string) => {
-    setSelectedDiskId(diskId);
-    setIsDiskModalOpen(false);
-    if (isPlaying) {
-      const newDisk = disks.find((d) => d.id === diskId);
-      const newUrl = (newDisk as any)?.music_url as string | undefined;
-      audioRef.pause();
-      if (newUrl) {
-        audioRef.src = newUrl;
-        audioRef.currentTime = 0;
-        audioRef.play();
-      } else {
-        setIsPlaying(false);
-      }
-    }
-  };
-
-  const DISK_SIZE = 560;
-  const DISK_VISIBLE = DISK_SIZE / 2;
-
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-white">
       <Toaster position="top-center" />
@@ -333,53 +310,17 @@ function EpisodeDetailpage() {
             <span className="text-sm">돌아가기</span>
           </button>
           <h1 className="text-base font-semibold text-[#0F1C46]">
-            에피소드 상세
-            {isDirty && <span className="text-[#0AA1F2]">(수정중)</span>}
+            에피소드 생성
           </h1>
           <div className="w-20" />
         </div>
       </header>
 
       <main className="relative flex flex-1 overflow-hidden">
-        {/* 노래 정보 박스 */}
-        {isDiskHovered && !isDragging && currentDisk?.disk_info?.music && (
-          <div
-            className="fixed z-10 px-4 py-3 bg-white border border-gray-200 shadow-md rounded-2xl w-52"
-            style={{ top: "200px", left: `${DISK_VISIBLE - 180}px` }}
-            onMouseEnter={handleDiskMouseEnter}
-            onMouseLeave={handleDiskMouseLeave}
-          >
-            <p className="text-[10px] text-gray-400 mb-1">
-              {currentDisk.disk_info.source}
-            </p>
-            <p className="text-sm font-bold text-[#0F1C46] leading-snug">
-              {currentDisk.disk_info.music.title}
-            </p>
-            <p className="mt-0.5 text-xs text-gray-500">
-              {currentDisk.disk_info.music.artist}
-            </p>
-            {currentDisk.disk_info.links?.youtube && (
-              <a
-                href={currentDisk.disk_info.links.youtube}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block mt-2 text-[10px] text-[#0AA1F2] hover:underline"
-              >
-                YouTube ↗
-              </a>
-            )}
-            {currentDisk.disk_info.license && (
-              <p className="text-[10px] text-gray-400 mt-1">
-                {currentDisk.disk_info.license.type}
-              </p>
-            )}
-          </div>
-        )}
-
-        {/* 왼쪽 디스크 공간 확보용 빈 div */}
+        {/* 왼쪽 공간 확보 */}
         <div className="shrink-0" style={{ width: `${DISK_VISIBLE}px` }} />
 
-        {/* 디스크 본체: fixed로 레이아웃에서 완전히 분리 → overflow 스택 영향 안 받음 */}
+        {/* 디스크: fixed로 레이아웃 분리 */}
         <div
           ref={diskRef}
           className="fixed"
@@ -422,7 +363,10 @@ function EpisodeDetailpage() {
                   className="object-cover w-full h-full"
                 />
               ) : (
-                <div className="w-full h-full bg-gray-200" />
+                // 디스크 미선택 시: 빈 원형 placeholder
+                <div className="flex items-center justify-center w-full h-full bg-gray-100">
+                  <p className="text-sm text-gray-300">디스크 없음</p>
+                </div>
               )}
             </div>
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -431,75 +375,48 @@ function EpisodeDetailpage() {
           </div>
         </div>
 
-        {/* 가운데: 에피소드 정보 + 노드 타임라인 */}
+        {/* 가운데: 에피소드 정보 입력 + 노드 타임라인 */}
         <div
           className="flex flex-col min-w-0 pl-8 pr-2 ml-20"
           style={{ width: "840px", flexShrink: 0, overflow: "visible" }}
         >
           <div className="flex flex-col h-full overflow-y-auto">
+            {/* 에피소드 이름 / 설명 입력 */}
             <div className="pt-20 pb-6 shrink-0">
-              {/* 에피소드 제목 영역 */}
-              {isEditingEpisode ? (
-                <div className="space-y-3">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
                   <input
                     type="text"
-                    value={editEpisodeName}
-                    onChange={(e) => setEditEpisodeName(e.target.value)}
-                    className="w-full text-4xl font-bold text-[#0F1C46] border-b-2  focus:outline-none bg-transparent tracking-tight pb-1"
+                    value={episodeName}
+                    onChange={(e) => setEpisodeName(e.target.value)}
+                    placeholder="이름"
+                    className="w-full text-5xl font-bold text-[#0F1C46] placeholder-gray-200 bg-transparent focus:outline-none tracking-tight mb-3"
                   />
                   <input
                     type="text"
-                    value={editEpisodeExplanation}
-                    onChange={(e) => setEditEpisodeExplanation(e.target.value)}
-                    className="w-full pb-1 text-1xl text-[#0F1C46] bg-transparent border-b border-gray-300 focus:outline-none"
+                    value={episodeExplanation}
+                    onChange={(e) => setEpisodeExplanation(e.target.value)}
+                    placeholder="설명"
+                    className="w-full pb-1 text-sm text-gray-400 placeholder-gray-300 transition-colors bg-transparent border-b border-transparent focus:outline-none focus:border-gray-200"
                   />
-                  <div className="flex gap-2 pt-1">
-                    <button
-                      onClick={handleEpisodeSave}
-                      className="flex items-center gap-1 px-4 py-2 bg-[#0AA1F2] text-white rounded-lg text-sm hover:bg-[#0890D9] transition-colors"
-                    >
-                      <Check className="w-3.5 h-3.5" />
-                      저장
-                    </button>
-                    <button
-                      onClick={() => setIsEditingEpisode(false)}
-                      className="px-4 py-2 text-sm text-gray-700 transition-colors bg-gray-200 rounded-lg hover:bg-gray-300"
-                    >
-                      취소
-                    </button>
-                  </div>
                 </div>
-              ) : (
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-3 group">
-                    <div>
-                      <h2 className="text-5xl font-bold text-[#0F1C46] mb-3 tracking-tight">
-                        {displayName}
-                      </h2>
-                      <p className="text-gray-400">{displayExplanation}</p>
-                    </div>
-                    {/* 수정 버튼: 제목 옆에 hover 시 표시 */}
-                    <button
-                      onClick={handleEpisodeEditStart}
-                      className="mt-3 flex items-center gap-1 text-[#0AA1F2] hover:text-[#0890D9] text-xs transition-colors opacity-0 group-hover:opacity-100"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                      수정
-                    </button>
-                  </div>
-                  {/* 노드 추가 버튼 */}
-                  <button
-                    onClick={handleAddNode}
-                    className="mt-2 flex items-center justify-center w-9 h-9 rounded-full text-gray-400 hover:text-[#0F1C46] hover:bg-gray-100 transition-colors shrink-0"
-                    title="노드 추가"
-                  >
-                    <Plus className="w-6 h-6" />
-                  </button>
-                </div>
-              )}
+                <button
+                  onClick={handleAddNode}
+                  className="mt-2 flex items-center justify-center w-9 h-9 rounded-full text-gray-400 hover:text-[#0F1C46] hover:bg-gray-100 transition-colors shrink-0"
+                  title="노드 추가"
+                >
+                  <Plus className="w-6 h-6" />
+                </button>
+              </div>
             </div>
 
+            {/* 노드 타임라인 */}
             <div className="relative pb-20">
+              {nodes.length === 0 && (
+                <p className="mt-2 text-sm text-gray-300">
+                  + 버튼으로 노드를 추가해보세요
+                </p>
+              )}
               {nodes.map((node, idx) => {
                 const isSelected = selectedNodeId === node.id;
                 const isLast = idx === nodes.length - 1;
@@ -656,79 +573,20 @@ function EpisodeDetailpage() {
           </div>
         </div>
 
-        {/* 오른쪽: 부가정보 */}
-        <div className="pt-20 pb-20 pl-0 pl-10 pr-8 overflow-y-auto shrink-0 w-96">
-          <div className="bg-gray-100 rounded-2xl p-6 min-h-[480px]">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm font-semibold text-gray-500">부가정보</p>
-              {!isEditingSubInfo && (
-                <button
-                  onClick={() => setIsEditingSubInfo(true)}
-                  className="flex items-center gap-1 text-[#0AA1F2] hover:text-[#0890D9] text-xs transition-colors"
-                >
-                  <Edit2 className="w-3.5 h-3.5" />
-                  수정
-                </button>
-              )}
-            </div>
-
-            {isEditingSubInfo ? (
-              <div className="space-y-3">
-                <textarea
-                  value={editedSubInfo}
-                  onChange={(e) => setEditedSubInfo(e.target.value)}
-                  rows={12}
-                  placeholder="마크다운 형식으로 입력하세요"
-                  className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0AA1F2] resize-none"
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => {
-                      setIsEditingSubInfo(false);
-                      setIsDirty(true);
-                    }}
-                    className="flex-1 px-3 py-2 bg-[#0AA1F2] text-white rounded-lg text-sm font-medium hover:bg-[#0890D9] transition-colors"
-                  >
-                    저장
-                  </button>
-                  <button
-                    onClick={() => {
-                      setEditedSubInfo(episode.sub_info ?? "");
-                      setIsEditingSubInfo(false);
-                    }}
-                    className="flex-1 px-3 py-2 text-sm font-medium text-gray-700 transition-colors bg-gray-200 rounded-lg hover:bg-gray-300"
-                  >
-                    취소
-                  </button>
-                </div>
-              </div>
-            ) : editedSubInfo ? (
-              <div className="prose-sm prose text-gray-600 max-w-none">
-                <ReactMarkdown>{editedSubInfo}</ReactMarkdown>
-              </div>
-            ) : (
-              <p className="text-sm text-gray-400">
-                등록된 부가정보가 없습니다.
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* ── 저장 드롭 영역: 드래그 중일 때만 오른쪽에서 슬라이드인 */}
+        {/* 저장 드롭 영역 */}
         <div
           ref={saveZoneRef}
           className="fixed top-0 right-0 z-30 flex items-center justify-center h-full transition-all duration-300 ease-out"
           style={{
             width: "120px",
-            // 드래그 중에만 나타남
             transform: isDragging ? "translateX(0)" : "translateX(100%)",
             background: isOverSaveZone
-              ? "linear-gradient(135deg, #0AA1F2, #0F1C46)" // 드롭 가능: 파란색
-              : "rgba(200, 210, 230, 0.85)", // 대기: 회색
+              ? "linear-gradient(135deg, #0AA1F2, #0F1C46)"
+              : "rgba(200, 210, 230, 0.85)",
             backdropFilter: "blur(8px)",
           }}
         >
-          <div className="flex flex-col items-center gap-3 text-white select-none">
+          <div className="flex flex-col items-center gap-3 select-none">
             <Save
               className="w-8 h-8 transition-transform duration-200"
               style={{
@@ -740,45 +598,35 @@ function EpisodeDetailpage() {
               className="text-sm font-semibold tracking-wide"
               style={{ color: isOverSaveZone ? "#fff" : "#6b7280" }}
             >
-              저장
+              생성
             </span>
           </div>
         </div>
       </main>
 
-      {/* 디스크 선택 모달 */}
+      {/* ── 디스크 선택 모달 (취소 없음 — 필수 선택) */}
       {isDiskModalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
-          onClick={() => setIsDiskModalOpen(false)}
-        >
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20">
           <div
-            className="bg-white rounded-3xl shadow-2xl p-8 w-[520px]"
+            className="bg-white rounded-3xl shadow-2xl p-10 w-[560px]"
+            // 바깥 클릭으로 닫히지 않도록 stopPropagation 없이 배경 클릭 막음
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-bold text-[#0F1C46]">
-                디스크를 골라주세요
-              </h3>
-              <button
-                onClick={() => setIsDiskModalOpen(false)}
-                className="p-1 text-gray-400 transition-colors hover:text-gray-600"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+            <h3 className="text-xl font-bold text-[#0F1C46] mb-8 text-center">
+              디스크를 골라주세요
+            </h3>
             <div className="grid grid-cols-3 gap-6">
               {disks.map((d) => (
                 <button
                   key={d.id}
-                  onClick={() => handleDiskChange(d.id)}
+                  onClick={() => handleDiskSelect(d.id)}
                   className={`flex flex-col items-center p-3 rounded-2xl transition-all ${
                     selectedDiskId === d.id
                       ? "ring-2 ring-[#0AA1F2] bg-blue-50"
                       : "hover:bg-gray-50"
                   }`}
                 >
-                  <div className="w-24 h-24 overflow-hidden rounded-full shadow-md">
+                  <div className="overflow-hidden rounded-full shadow-md w-28 h-28">
                     <img
                       src={d.img_url}
                       alt={d.name}
@@ -802,4 +650,4 @@ function EpisodeDetailpage() {
   );
 }
 
-export default EpisodeDetailpage;
+export default EpisodeCreatePage;

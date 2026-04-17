@@ -78,7 +78,7 @@ export const disks: Disk[] = [
     music_url:
       "https://tigdknqewhaomwtxbzxq.supabase.co/storage/v1/object/public/disk_music/pink.mp3",
     created_at: "2026-03-23 00:05:54.150122+00",
-    emotion: ["설렘", "포근함", "부드러운 기쁨", "조용한 애정"],
+    emotion: ["설렘", "부드러운"],
   },
   {
     id: "5357ae75-a9af-46d3-bd8e-291b20a65a0e",
@@ -104,12 +104,7 @@ export const disks: Disk[] = [
     music_url:
       "https://tigdknqewhaomwtxbzxq.supabase.co/storage/v1/object/public/disk_music/red.mp3",
     created_at: "2026-03-23 00:02:34.82082+00",
-    emotion: [
-      "은근히 올라오는 열감",
-      "조금 날이 선 기분",
-      "참고 있지만 남아있는 긴장",
-      "속에서 맴도는 불편함",
-    ],
+    emotion: ["긴장", "걱정", "초조"],
   },
   {
     id: "1c20e1aa-f375-4b44-ad8c-836e8e1823e7",
@@ -135,7 +130,7 @@ export const disks: Disk[] = [
     music_url:
       "https://tigdknqewhaomwtxbzxq.supabase.co/storage/v1/object/public/disk_music/turquoise.mp3",
     created_at: "2026-03-23 00:08:09.271559+00",
-    emotion: ["차분함", "맑은 느낌", "여유로움", "은은한 안정감"],
+    emotion: ["차분한", "여유로운"],
   },
   {
     id: "a4a7ad41-63ea-45d5-afdb-05815c3abe34",
@@ -161,7 +156,7 @@ export const disks: Disk[] = [
     music_url:
       "https://tigdknqewhaomwtxbzxq.supabase.co/storage/v1/object/public/disk_music/gold.mp3",
     created_at: "2026-03-23 00:09:35.563278+00",
-    emotion: ["풍요로움", "은근한 자신감", "빛나는 느낌", "여유 있는 만족"],
+    emotion: ["당당함", "든든함"],
   },
   {
     id: "6bb0e9d4-865d-4f43-947b-738a50df084e",
@@ -187,7 +182,7 @@ export const disks: Disk[] = [
     music_url:
       "https://tigdknqewhaomwtxbzxq.supabase.co/storage/v1/object/public/disk_music/yellow.mp3",
     created_at: "2026-03-23 00:11:00.560781+00",
-    emotion: ["밝음", "가벼운 기쁨", "희망적인 느낌", "산뜻함"],
+    emotion: ["밝은", "산뜻함"],
   },
   {
     id: "b3bcb096-c8f1-4eb4-b48d-a4fb125a7c98",
@@ -213,7 +208,7 @@ export const disks: Disk[] = [
     music_url:
       "https://tigdknqewhaomwtxbzxq.supabase.co/storage/v1/object/public/disk_music/purple.mp3",
     created_at: "2026-03-23 00:12:27.49909+00",
-    emotion: ["신비로움", "차분한 깊이", "은근한 집중", "고요한 분위기"],
+    emotion: ["신비로움", "고요한"],
   },
 ];
 

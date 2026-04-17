@@ -12,6 +12,16 @@ import {
 
 // ── 드래그 감지 임계값 (px): 이 값보다 많이 움직여야 드래그로 인식
 //    클릭과 드래그를 구분하는 기준입니다. 값을 높이면 더 많이 움직여야 드래그 시작
+
+const DISK_TEXT_COLORS = [
+  "#C76BB5", // 핑크/보라
+  "#8B4513", // 주황/갈색
+  "#2E9DAA", // 파랑/청록
+  "#B8860B", // 골드/브라운
+  "#C8B400", // 노랑
+  "#7B68EE", // 보라/라벤더
+];
+
 const DRAG_THRESHOLD = 5;
 
 const DEFAULT_NODE_NAME = "새 노드";
@@ -608,19 +618,18 @@ function EpisodeCreatePage() {
       {isDiskModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20">
           <div
-            className="bg-white rounded-3xl shadow-2xl p-10 w-[560px]"
-            // 바깥 클릭으로 닫히지 않도록 stopPropagation 없이 배경 클릭 막음
+            className="bg-white rounded-3xl shadow-2xl p-10 w-[720px]"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-xl font-bold text-[#0F1C46] mb-8 text-center">
-              디스크를 골라주세요
+              이 에피소드를 생각하면 어떤 감정이 느껴지나요?
             </h3>
-            <div className="grid grid-cols-3 gap-6">
-              {disks.map((d) => (
+            <div className="grid grid-cols-3 gap-8">
+              {disks.map((d, index) => (
                 <button
                   key={d.id}
                   onClick={() => handleDiskSelect(d.id)}
-                  className={`flex flex-col items-center p-3 rounded-2xl transition-all ${
+                  className={`flex flex-col items-center gap-2 p-4 rounded-2xl transition-all ${
                     selectedDiskId === d.id
                       ? "ring-2 ring-[#0AA1F2] bg-blue-50"
                       : "hover:bg-gray-50"
@@ -633,6 +642,17 @@ function EpisodeCreatePage() {
                       className="object-cover w-full h-full"
                     />
                   </div>
+                  {d.emotion && d.emotion.length > 0 && (
+                    <span
+                      className="text-sm leading-snug text-center"
+                      style={{
+                        color:
+                          DISK_TEXT_COLORS[index % DISK_TEXT_COLORS.length],
+                      }}
+                    >
+                      {d.emotion.join(", ")}
+                    </span>
+                  )}
                 </button>
               ))}
             </div>

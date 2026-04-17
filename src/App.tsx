@@ -24,7 +24,7 @@ function App() {
           element={<EpisodeDetailpage />}
         />
 
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/main" replace />} />
       </Routes>
     </BrowserRouter>
   );

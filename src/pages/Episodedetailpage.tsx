@@ -16,6 +16,15 @@ const DEFAULT_NODE_EXPLANATION = "한줄 설명을 입력해주세요";
 //    클릭과 드래그를 구분하는 기준입니다. 값을 높이면 더 많이 움직여야 드래그 시작
 const DRAG_THRESHOLD = 5;
 
+const DISK_TEXT_COLORS = [
+  "#C76BB5", // 핑크/보라
+  "#8B4513", // 주황/갈색
+  "#2E9DAA", // 파랑/청록
+  "#B8860B", // 골드/브라운
+  "#C8B400", // 노랑
+  "#7B68EE", // 보라/라벤더
+];
+
 function EpisodeDetailpage() {
   const { episodeId, id } = useParams<{ episodeId: string; id: string }>();
   const navigate = useNavigate();
@@ -321,7 +330,6 @@ function EpisodeDetailpage() {
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-white">
       <Toaster position="top-center" />
-
       {/* 헤더 */}
       <header className="z-20 bg-white border-b border-gray-100 shrink-0">
         <div className="flex items-center justify-between px-8 py-4">
@@ -339,7 +347,6 @@ function EpisodeDetailpage() {
           <div className="w-20" />
         </div>
       </header>
-
       <main className="relative flex flex-1 overflow-hidden">
         {/* 노래 정보 박스 */}
         {isDiskHovered && !isDragging && currentDisk?.disk_info?.music && (
@@ -745,20 +752,19 @@ function EpisodeDetailpage() {
           </div>
         </div>
       </main>
-
       {/* 디스크 선택 모달 */}
       {isDiskModalOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/20"
           onClick={() => setIsDiskModalOpen(false)}
         >
           <div
-            className="bg-white rounded-3xl shadow-2xl p-8 w-[520px]"
+            className="bg-white rounded-3xl shadow-2xl p-8 w-[720px]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-bold text-[#0F1C46]">
-                디스크를 골라주세요
+                이 에피소드를 생각하면 어떤 감정이 느껴지나요?
               </h3>
               <button
                 onClick={() => setIsDiskModalOpen(false)}
@@ -768,30 +774,40 @@ function EpisodeDetailpage() {
               </button>
             </div>
             <div className="grid grid-cols-3 gap-6">
-              {disks.map((d) => (
+              {disks.map((d, index) => (
                 <button
                   key={d.id}
                   onClick={() => handleDiskChange(d.id)}
-                  className={`flex flex-col items-center p-3 rounded-2xl transition-all ${
+                  className={`flex flex-col items-center gap-2 p-4 rounded-2xl transition-all ${
                     selectedDiskId === d.id
                       ? "ring-2 ring-[#0AA1F2] bg-blue-50"
                       : "hover:bg-gray-50"
                   }`}
                 >
-                  <div className="w-24 h-24 overflow-hidden rounded-full shadow-md">
+                  <div className="overflow-hidden rounded-full shadow-md w-28 h-28">
                     <img
                       src={d.img_url}
                       alt={d.name}
                       className="object-cover w-full h-full"
                     />
                   </div>
+                  {d.emotion && d.emotion.length > 0 && (
+                    <span
+                      className="text-sm leading-snug text-center"
+                      style={{
+                        color:
+                          DISK_TEXT_COLORS[index % DISK_TEXT_COLORS.length],
+                      }}
+                    >
+                      {d.emotion.join(", ")}
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
           </div>
         </div>
       )}
-
       <style>{`
         @keyframes diskSpin {
           from { transform: rotate(0deg); }

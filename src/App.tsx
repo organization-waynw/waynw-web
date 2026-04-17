@@ -5,6 +5,8 @@ import MainPage from "./pages/MainPage";
 import PersonaDetailPage from "./pages/PersonaDetailPage";
 import EpisodeDetailpage from "./pages/EpisodeDetailpage";
 import EpisodeCreatepage from "./pages/EpisodeCreatepage";
+import PersonaCreateStep2 from "./pages/PersonaCreateStep2";
+import PersonaCreateStep1 from "./pages/PersonaCreateStep1";
 
 function App() {
   return (
@@ -23,6 +25,9 @@ function App() {
           path="/persona/:id/episode/:episodeId"
           element={<EpisodeDetailpage />}
         />
+
+        <Route path="/persona/create" element={<PersonaCreateStep1 />} />
+        <Route path="/persona/create/step2" element={<PersonaCreateStep2 />} />
 
         <Route path="*" element={<Navigate to="/main" replace />} />
       </Routes>

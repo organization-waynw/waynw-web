@@ -48,12 +48,12 @@ function PersonaCreateStep1() {
   const handleSubInfoChange = (
     index: number,
     field: keyof SubInfo,
-    value: string
+    value: string,
   ) => {
     setFormData((prev) => ({
       ...prev,
       subInfos: prev.subInfos.map((info, i) =>
-        i === index ? { ...info, [field]: value } : info
+        i === index ? { ...info, [field]: value } : info,
       ),
     }));
   };
@@ -74,10 +74,13 @@ function PersonaCreateStep1() {
 
   const handleNext = () => {
     // formData를 state/context/sessionStorage로 넘김
-    sessionStorage.setItem("personaFormStep1", JSON.stringify({
-      ...formData,
-      profileImage: null, // File은 직렬화 불가, preview만 보존
-    }));
+    sessionStorage.setItem(
+      "personaFormStep1",
+      JSON.stringify({
+        ...formData,
+        profileImage: null, // File은 직렬화 불가, preview만 보존
+      }),
+    );
     navigate("/persona/create/step2");
   };
 
@@ -93,13 +96,26 @@ function PersonaCreateStep1() {
             onClick={() => navigate("/main")}
             className="flex items-center gap-2 text-sm text-gray-500 hover:text-[#0F1C46] transition-colors"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <polyline points="15 18 9 12 15 6" />
             </svg>
             돌아가기
           </button>
-          <h1 className="mt-3 text-2xl font-bold text-[#0F1C46]">페르소나 생성</h1>
-          <p className="mt-1 text-sm text-gray-500">새로운 AI 페르소나를 만들어보세요.</p>
+          <h1 className="mt-3 text-2xl font-bold text-[#0F1C46]">
+            페르소나 생성
+          </h1>
+          <p className="mt-1 text-sm text-gray-500">
+            새로운 AI 페르소나를 만들어보세요.
+          </p>
         </div>
 
         <div className="flex flex-col gap-6 lg:flex-row">
@@ -107,7 +123,9 @@ function PersonaCreateStep1() {
           <div className="flex flex-col items-center gap-3 lg:w-64">
             {/* 자동 생성 토글 */}
             <div className="flex items-center justify-between w-full px-4 py-3 bg-white shadow-sm rounded-xl">
-              <span className="text-sm font-medium text-[#0F1C46]">자동생성</span>
+              <span className="text-sm font-medium text-[#0F1C46]">
+                자동생성
+              </span>
               <button
                 onClick={() =>
                   setFormData((prev) => ({
@@ -129,7 +147,9 @@ function PersonaCreateStep1() {
 
             {/* 프로필 이미지 업로드 */}
             <div
-              onClick={() => !formData.autoGenerate && fileInputRef.current?.click()}
+              onClick={() =>
+                !formData.autoGenerate && fileInputRef.current?.click()
+              }
               className={`w-48 h-48 rounded-full flex items-center justify-center overflow-hidden bg-gray-200 border-4 border-white shadow-md transition-all ${
                 formData.autoGenerate
                   ? "opacity-50 cursor-not-allowed"
@@ -144,12 +164,23 @@ function PersonaCreateStep1() {
                 />
               ) : (
                 <div className="flex flex-col items-center gap-2 text-gray-500">
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    width="32"
+                    height="32"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <line x1="12" y1="5" x2="12" y2="19" />
                     <line x1="5" y1="12" x2="19" y2="12" />
                   </svg>
                   {formData.autoGenerate && (
-                    <span className="px-2 text-xs text-center">자동 생성됩니다</span>
+                    <span className="px-2 text-xs text-center">
+                      자동 생성됩니다
+                    </span>
                   )}
                 </div>
               )}
@@ -175,7 +206,9 @@ function PersonaCreateStep1() {
               <h2 className="text-base font-bold text-[#0F1C46]">기본 정보</h2>
               <div className="flex gap-4">
                 <div className="flex-1">
-                  <label className="block mb-1 text-xs font-medium text-gray-500">이름 *</label>
+                  <label className="block mb-1 text-xs font-medium text-gray-500">
+                    이름 *
+                  </label>
                   <input
                     type="text"
                     placeholder="이름을 입력하세요"
@@ -187,13 +220,18 @@ function PersonaCreateStep1() {
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="block mb-1 text-xs font-medium text-gray-500">호칭 *</label>
+                  <label className="block mb-1 text-xs font-medium text-gray-500">
+                    호칭 *
+                  </label>
                   <input
                     type="text"
                     placeholder="예: 선배님, 멘토님"
                     value={formData.title}
                     onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, title: e.target.value }))
+                      setFormData((prev) => ({
+                        ...prev,
+                        title: e.target.value,
+                      }))
                     }
                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0F1C46] transition-colors"
                   />
@@ -203,12 +241,23 @@ function PersonaCreateStep1() {
               {/* 추가정보 (제목 + 내용 쌍) */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-medium text-gray-500">추가 정보</label>
+                  <label className="text-xs font-medium text-gray-500">
+                    추가 정보
+                  </label>
                   <button
                     onClick={handleAddSubInfo}
                     className="text-xs text-[#0F1C46] hover:underline flex items-center gap-1"
                   >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <line x1="12" y1="5" x2="12" y2="19" />
                       <line x1="5" y1="12" x2="19" y2="12" />
                     </svg>
@@ -235,7 +284,11 @@ function PersonaCreateStep1() {
                           placeholder="내용"
                           value={info.content}
                           onChange={(e) =>
-                            handleSubInfoChange(index, "content", e.target.value)
+                            handleSubInfoChange(
+                              index,
+                              "content",
+                              e.target.value,
+                            )
                           }
                           className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#0F1C46] transition-colors"
                         />
@@ -245,7 +298,16 @@ function PersonaCreateStep1() {
                           onClick={() => handleRemoveSubInfo(index)}
                           className="flex-shrink-0 mt-2 text-gray-400 transition-colors hover:text-red-400"
                         >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
                             <line x1="18" y1="6" x2="6" y2="18" />
                             <line x1="6" y1="6" x2="18" y2="18" />
                           </svg>
@@ -277,7 +339,7 @@ function PersonaCreateStep1() {
             {/* 등록 버튼 */}
             <div className="flex justify-end gap-3">
               <button
-                onClick={() => navigate(-1)}
+                onClick={() => navigate("/main")}
                 className="px-6 py-2.5 rounded-xl border border-gray-300 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
               >
                 취소

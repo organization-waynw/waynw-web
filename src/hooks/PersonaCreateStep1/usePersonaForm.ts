@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { STEP1_SESSION_KEY } from "../../constants/personaCreateStep1.constants";
 import {
@@ -21,6 +21,14 @@ export function usePersonaForm() {
   });
 
   const isValid = formData.name.trim() && formData.title.trim();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") navigate("/main");
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [navigate]);
 
   const handleAddSubInfo = () => {
     setFormData((prev) => ({

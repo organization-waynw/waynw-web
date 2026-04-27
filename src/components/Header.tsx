@@ -9,7 +9,7 @@ function Header({ searchQuery, setSearchQuery }: HeaderProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <img src={Logo} alt="Logo" className="w-10 h-10 mr-2" />
-            <h1 className="text-2xl font-bold text-[#0F1C46]">IMQA</h1>
+            <h1 className="text-2xl font-bold text-[#0F1C46]">WAYNW</h1>
           </div>
 
           {searchQuery !== undefined && setSearchQuery && (

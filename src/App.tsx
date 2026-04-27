@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import MainPage from "./pages/MainPage";
@@ -31,6 +32,28 @@ function App() {
 
         <Route path="*" element={<Navigate to="/main" replace />} />
       </Routes>
+
+      <Toaster
+        position="top-center"
+        gutter={8}
+        containerStyle={{ top: 20, right: 20 }}
+        toastOptions={{
+          duration: 1000,
+          style: {
+            background: "#fff",
+            color: "#111",
+            border: "1px solid #e5e7eb",
+            padding: "12px 16px",
+            fontSize: "14px",
+          },
+          success: {
+            duration: 1000,
+          },
+          error: {
+            duration: 1000,
+          },
+        }}
+      />
     </BrowserRouter>
   );
 }

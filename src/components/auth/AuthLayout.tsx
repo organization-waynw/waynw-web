@@ -29,7 +29,7 @@ function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
           <div className="mb-12 text-center">
             <div className="flex items-center justify-center mb-2">
               <img src={Logo} alt="Logo" className="w-12 h-12 mr-2" />
-              <h2 className="text-3xl font-bold text-[#0F1C46]">IMQA</h2>
+              <h2 className="text-3xl font-bold text-[#0F1C46]">WAYNW</h2>
             </div>
           </div>
 

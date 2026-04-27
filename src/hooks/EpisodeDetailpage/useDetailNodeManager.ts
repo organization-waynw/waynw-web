@@ -8,7 +8,7 @@ import {
   DEFAULT_NODE_EXPLANATION,
   DEFAULT_NODE_NAME,
 } from "../../constants/episodedetail.constants";
-import { EpisodeNode } from "../../types/Episodes/Rpisodes";
+import { EpisodeNode } from "../../types/Episodes/Episodes";
 
 interface UseDetailNodeManagerOptions {
   baseNodes: EpisodeNode[];

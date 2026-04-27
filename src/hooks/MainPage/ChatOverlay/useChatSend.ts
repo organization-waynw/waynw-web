@@ -1,0 +1,68 @@
+import { useCallback, useRef } from "react";
+import { Message, generateId } from "../../../types/Chat/chat";
+
+export function useChatSend(params: {
+  wsRef: React.MutableRefObject<WebSocket | null>;
+  messages: Message[];
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
+  isStreaming: boolean;
+  personaId: string;
+}) {
+  const { wsRef, messages, setMessages, isStreaming, personaId } = params;
+
+  const isSendingRef = useRef(false);
+
+  const sendMessage = useCallback(
+    (input: string, resetInput: () => void, closeCommand: () => void) => {
+      if (isSendingRef.current || isStreaming) return;
+
+      const trimmed = input.trim();
+      if (!trimmed) return;
+
+      const ws = wsRef.current;
+      if (!ws || ws.readyState !== WebSocket.OPEN) return;
+
+      isSendingRef.current = true;
+
+      const userMsg: Message = {
+        id: generateId(),
+        role: "user",
+        text: trimmed,
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => {
+        const next = [...prev, userMsg];
+
+        ws.send(
+          JSON.stringify({
+            type: "chat",
+            personaId,
+            messages: next.map((m) => ({
+              role: m.role,
+              text: m.text,
+            })),
+          }),
+        );
+
+        return next;
+      });
+
+      resetInput();
+      closeCommand();
+
+      setTimeout(() => {
+        isSendingRef.current = false;
+      }, 0);
+    },
+    [isStreaming, personaId],
+  );
+
+  const abort = useCallback(() => {
+    const ws = wsRef.current;
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+    ws.send(JSON.stringify({ type: "abort" }));
+  }, []);
+
+  return { sendMessage, abort };
+}

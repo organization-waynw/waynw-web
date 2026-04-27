@@ -3,7 +3,7 @@
  * 모든 노드를 타임라인으로 표시하는 컨테이너
  */
 
-import { EpisodeNode } from "../../types/Episodes/Rpisodes";
+import { EpisodeNode } from "../../types/Episodes/Episodes";
 import { NodeItem } from "./Nodeitem";
 
 interface NodeTimelineProps {

@@ -3,7 +3,7 @@
  * 에피소드 상세 페이지의 노드 타임라인
  */
 
-import { EpisodeNode } from "../../types/Episodes/Rpisodes";
+import { EpisodeNode } from "../../types/Episodes/Episodes";
 import { DetailNodeItem } from "./DetailNodeItem";
 
 interface DetailNodeTimelineProps {

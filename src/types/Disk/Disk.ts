@@ -1,14 +1,3 @@
-// interface는 추후 types로 분리
-export interface Episode {
-  id: string;
-  persona_id: string;
-  name: string;
-  one_line_explanation: string;
-  sub_info?: string;
-  disk_id: string;
-  created_at: string;
-}
-
 export type DiskName =
   | "red"
   | "pink"
@@ -32,15 +21,6 @@ export interface DiskInfo {
     youtube?: string;
   };
   source?: string;
-}
-
-export interface EpisodeNode {
-  id: number;
-  name?: string;
-  one_line_explanation?: string;
-  content?: string;
-  episode_id?: string;
-  created_at: string;
 }
 
 export interface Disk {

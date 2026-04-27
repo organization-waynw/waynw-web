@@ -4,7 +4,7 @@
  */
 
 import { Edit2, Trash2, Check } from "lucide-react";
-import { EpisodeNode } from "../../types/Episodes/Rpisodes";
+import { EpisodeNode } from "../../types/Episodes/Episodes";
 
 interface DetailNodeItemProps {
   node: EpisodeNode;

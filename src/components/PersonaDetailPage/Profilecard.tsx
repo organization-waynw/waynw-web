@@ -1,4 +1,5 @@
 import { CreditCard as Edit2, X } from "lucide-react";
+import { ExtraInfo } from "../../types/Persona/Persona";
 
 const btnPrimary =
   "flex-1 px-3 py-2 bg-[#0AA1F2] text-white rounded-lg font-medium hover:bg-[#0890D9] transition-colors text-sm";
@@ -13,7 +14,7 @@ interface ProfileCardProps {
   editedTitle: string;
   displayImg: string | null;
   isEditingExtraInfo: boolean;
-  editedExtraInfo: string[];
+  editedExtraInfo: ExtraInfo[];
   onEditProfileStart: () => void;
   onNameChange: (v: string) => void;
   onTitleChange: (v: string) => void;
@@ -21,7 +22,11 @@ interface ProfileCardProps {
   onProfileSave: () => void;
   onProfileCancel: () => void;
   onEditExtraInfoStart: () => void;
-  onExtraInfoChange: (index: number, value: string) => void;
+  onExtraInfoChange: (
+    index: number,
+    field: keyof ExtraInfo,
+    value: string,
+  ) => void;
   onExtraInfoRemove: (index: number) => void;
   onExtraInfoAdd: () => void;
   onExtraInfoSave: () => void;
@@ -147,20 +152,36 @@ export function ProfileCard({
             {isEditingExtraInfo ? (
               <div className="space-y-3">
                 {editedExtraInfo.map((info, index) => (
-                  <div key={index} className="flex items-center gap-2">
+                  <div
+                    key={index}
+                    className="flex flex-col gap-1 p-3 bg-[#ECF0F9] rounded-lg"
+                  >
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={info.title}
+                        onChange={(e) =>
+                          onExtraInfoChange(index, "title", e.target.value)
+                        }
+                        className="flex-1 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0AA1F2]"
+                        placeholder="제목"
+                      />
+                      <button
+                        onClick={() => onExtraInfoRemove(index)}
+                        className="p-1 text-gray-400 transition-colors hover:text-red-500"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
                     <input
                       type="text"
-                      value={info}
-                      onChange={(e) => onExtraInfoChange(index, e.target.value)}
-                      className="flex-1 px-3 py-2 bg-[#ECF0F9] border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0AA1F2]"
-                      placeholder="정보 입력"
+                      value={info.content}
+                      onChange={(e) =>
+                        onExtraInfoChange(index, "content", e.target.value)
+                      }
+                      className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0AA1F2]"
+                      placeholder="내용"
                     />
-                    <button
-                      onClick={() => onExtraInfoRemove(index)}
-                      className="p-1 text-gray-400 transition-colors hover:text-red-500"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
                   </div>
                 ))}
                 {editedExtraInfo.length < 5 && (
@@ -184,11 +205,13 @@ export function ProfileCard({
               <div className="space-y-2">
                 {editedExtraInfo.length > 0 ? (
                   editedExtraInfo.map((info, index) => (
-                    <div
-                      key={index}
-                      className="text-sm text-gray-700 p-2 bg-[#ECF0F9] rounded"
-                    >
-                      • {info}
+                    <div key={index} className="p-3 bg-[#ECF0F9] rounded-lg">
+                      <p className="text-sm font-medium text-[#0F1C46]">
+                        {info.title}
+                      </p>
+                      <p className="text-sm text-gray-600 mt-0.5">
+                        {info.content}
+                      </p>
                     </div>
                   ))
                 ) : (

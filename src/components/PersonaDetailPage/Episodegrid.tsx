@@ -1,5 +1,5 @@
 import { disks } from "../../data/EPISODES";
-import { Episode } from "../../types/Episodes/Rpisodes";
+import { Episode } from "../../types/Episodes/Episodes";
 import {
   DISK_SPIN_DURATION,
   getDiskAnimationDelay,

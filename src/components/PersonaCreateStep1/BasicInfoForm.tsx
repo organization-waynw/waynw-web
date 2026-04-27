@@ -28,7 +28,7 @@ export function BasicInfoForm({
       <div className="flex gap-4">
         <div className="flex-1">
           <label className="block mb-1 text-xs font-medium text-gray-500">
-            이름 *
+            이름 <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -40,7 +40,7 @@ export function BasicInfoForm({
         </div>
         <div className="flex-1">
           <label className="block mb-1 text-xs font-medium text-gray-500">
-            호칭 *
+            호칭 <span className="text-red-500">*</span>
           </label>
           <input
             type="text"

@@ -1,5 +1,5 @@
 import { disks } from "../../data/EPISODES";
-import { DiskName } from "../../types/Episodes/Rpisodes";
+import { DiskName } from "../../types/Disk/Disk";
 
 interface EpisodeFilterBarProps {
   searchQuery: string;

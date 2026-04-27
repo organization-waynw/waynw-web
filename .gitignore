@@ -10,6 +10,7 @@ node_modules
 dist
 dist-ssr
 *.local
+package-lock.json
 
 .vscode/*
 !.vscode/extensions.json
@@ -24,3 +25,4 @@ dist-ssr
 
 todo.md
 cli/
+기록지.md

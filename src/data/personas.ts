@@ -1,15 +1,7 @@
 // interface는 추후 types로 분리
 
-export interface Persona {
-  id: string;
-  user_id: string;
-  name: string;
-  title: string;
-  extra_info?: string[];
-  sub_info?: string;
-  profile_img_path?: string;
-  created_at: string;
-}
+import { Persona } from "../types/Persona/Persona";
+
 
 export const personas: Persona[] = [
   {

@@ -4,7 +4,7 @@
  */
 
 import { useState, useCallback } from "react";
-import { Episode } from "../../types/Episodes/Rpisodes";
+import { Episode } from "../../types/Episodes/Episodes";
 
 interface UseDetailEpisodeInfoOptions {
   episode?: Episode;

@@ -9,7 +9,7 @@ import {
   DISK_SIZE,
   DISK_VISIBLE,
 } from "../../constants/episodeCreate.constants";
-import { Disk } from "../../types/Episodes/Rpisodes";
+import { Disk } from "../../types/Episodes/Episodes";
 
 interface DiskSectionProps {
   currentDisk: Disk | undefined;

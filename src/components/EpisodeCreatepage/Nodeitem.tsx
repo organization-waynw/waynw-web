@@ -6,7 +6,7 @@
 import { Edit2, Trash2 } from "lucide-react";
 import { NodeEditPanel } from "./Nodeeditpanel";
 import { NodeViewPanel } from "./Nodeviewpanel";
-import { EpisodeNode } from "../../types/Episodes/Rpisodes";
+import { EpisodeNode } from "../../types/Episodes/Episodes";
 
 interface NodeItemProps {
   node: EpisodeNode;

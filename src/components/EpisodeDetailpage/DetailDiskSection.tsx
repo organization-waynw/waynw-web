@@ -9,7 +9,7 @@ import {
   DISK_VISIBLE,
 } from "../../constants/episodedetail.constants";
 import { DISK_SPIN_DURATION } from "../../utils/DiskAnimation";
-import { Disk } from "../../types/Episodes/Rpisodes";
+import { Disk } from "../../types/Episodes/Episodes";
 
 interface DetailDiskSectionProps {
   currentDisk: Disk | undefined;

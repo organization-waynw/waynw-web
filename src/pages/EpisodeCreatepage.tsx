@@ -8,9 +8,8 @@
  */
 
 import { useRef, useMemo, useState } from "react";
-import { Toaster } from "react-hot-toast";
 import { disks } from "../data/EPISODES";
-import { getDiskAnimationDelay } from "../utils/DiskAnimation";
+import { getDiskAnimationDelay } from "../utils/diskAnimation";
 import { useEpisodeState } from "../hooks/EpisodeCreatepage/useEpisodeState";
 import { useNodeManager } from "../hooks/EpisodeCreatepage/useNodeManager";
 import { useAudioPlayer } from "../hooks/EpisodeCreatepage/useAudioPlayer";
@@ -27,21 +26,23 @@ function EpisodeCreatePage() {
   // ── 디스크 선택
   const diskRef = useRef<HTMLDivElement>(null);
   const saveZoneRef = useRef<HTMLDivElement>(null);
-
-  // 상태 관리
-  const episodeState = useEpisodeState({
-    onSaveSound: () => audioPlayer.playSaveSound(),
-  });
-
-  const nodeManager = useNodeManager();
-  const audioPlayer = useAudioPlayer();
-  const diskDrag = useDiskDrag(saveZoneRef, {
-    onSave: episodeState.save,
-  });
-
   // 디스크 관련
   const [selectedDiskId, setSelectedDiskId] = useState<string | null>(null);
   const [isDiskModalOpen, setIsDiskModalOpen] = useState(true);
+
+  const nodeManager = useNodeManager();
+  const audioPlayer = useAudioPlayer();
+
+  // 상태 관리
+  const episodeState = useEpisodeState({
+    selectedDiskId,
+    nodes: nodeManager.nodes,
+    onSaveSound: () => audioPlayer.playSaveSound(),
+  });
+
+  const diskDrag = useDiskDrag(saveZoneRef, {
+    onSave: episodeState.save,
+  });
 
   const currentDisk = disks.find((d) => d.id === selectedDiskId);
   const diskAnimationDelay = useMemo(() => getDiskAnimationDelay(), []);
@@ -79,8 +80,6 @@ function EpisodeCreatePage() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-white">
-      <Toaster position="top-center" />
-
       {/* 헤더 */}
       <EpisodeHeader />
 

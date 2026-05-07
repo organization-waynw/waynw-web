@@ -8,32 +8,28 @@ import {
   DEFAULT_NODE_EXPLANATION,
   DEFAULT_NODE_NAME,
 } from "../../constants/episodedetail.constants";
-import { EpisodeNode } from "../../types/Episodes/Episodes";
+import { reorderNodes } from "../../utils/episodeNodeDnD";
+import { EpisodeNode } from "../../types/Episodes/episodes";
 
 interface UseDetailNodeManagerOptions {
   baseNodes: EpisodeNode[];
   episodeId?: string;
+  onDirty?: () => void;
 }
 
 export function useDetailNodeManager({
   baseNodes,
   episodeId,
+  onDirty,
 }: UseDetailNodeManagerOptions) {
   const [nodes, setNodes] = useState<EpisodeNode[]>(baseNodes);
   const [selectedNodeId, setSelectedNodeId] = useState<number | null>(null);
   const [isEditingNode, setIsEditingNode] = useState(false);
 
-  // 수정 중인 노드의 필드들
   const [editNodeName, setEditNodeName] = useState("");
   const [editNodeExplanation, setEditNodeExplanation] = useState("");
   const [editNodeContent, setEditNodeContent] = useState("");
 
-  // isDirty 콜백
-  const [onDirty, setOnDirty] = useState<(() => void) | null>(null);
-
-  /**
-   * 새로운 노드 추가
-   */
   const addNode = () => {
     const newNode: EpisodeNode = {
       id: Date.now(),
@@ -49,9 +45,6 @@ export function useDetailNodeManager({
     onDirty?.();
   };
 
-  /**
-   * 노드 삭제
-   */
   const deleteNode = (nodeId: number, e: React.MouseEvent) => {
     e.stopPropagation();
     setNodes((prev) => prev.filter((n) => n.id !== nodeId));
@@ -63,9 +56,6 @@ export function useDetailNodeManager({
     onDirty?.();
   };
 
-  /**
-   * 노드 선택 (토글)
-   */
   const selectNode = (nodeId: number, startEditing = false) => {
     const node = nodes.find((n) => n.id === nodeId);
     if (!node) return;
@@ -82,9 +72,6 @@ export function useDetailNodeManager({
     }
   };
 
-  /**
-   * 편집 시작
-   */
   const startEditing = (nodeId: number) => {
     const node = nodes.find((n) => n.id === nodeId);
     if (!node) return;
@@ -95,9 +82,6 @@ export function useDetailNodeManager({
     setIsEditingNode(true);
   };
 
-  /**
-   * 편집 저장
-   */
   const saveEdit = () => {
     setNodes((prev) =>
       prev.map((n) =>
@@ -115,13 +99,9 @@ export function useDetailNodeManager({
     onDirty?.();
   };
 
-  /**
-   * 편집 취소
-   */
   const cancelEdit = () => {
     const currentNode = nodes.find((n) => n.id === selectedNodeId);
 
-    // 기본값으로만 채워진 새 노드라면 삭제
     if (
       currentNode &&
       currentNode.name === DEFAULT_NODE_NAME &&
@@ -135,8 +115,21 @@ export function useDetailNodeManager({
     setIsEditingNode(false);
   };
 
+  /**
+   * 노드 순서 변경
+   */
+  const moveNode = (fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex) return;
+
+    setNodes((prev) => reorderNodes(prev, fromIndex, toIndex));
+    onDirty?.();
+  };
+
+  const resetNodes = (newNodes: EpisodeNode[]) => {
+    setNodes(newNodes);
+  };
+
   return {
-    // 상태
     nodes,
     selectedNodeId,
     isEditingNode,
@@ -144,18 +137,17 @@ export function useDetailNodeManager({
     editNodeExplanation,
     editNodeContent,
 
-    // 상태 업데이트
     setEditNodeName,
     setEditNodeExplanation,
     setEditNodeContent,
-    setOnDirty,
 
-    // 액션
     addNode,
     deleteNode,
     selectNode,
     startEditing,
     saveEdit,
     cancelEdit,
+    moveNode,
+    resetNodes,
   };
 }

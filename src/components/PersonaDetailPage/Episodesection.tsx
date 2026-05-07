@@ -1,8 +1,8 @@
 import { Plus } from "lucide-react";
 import { EpisodeFilterBar } from "./Episodefilterbar";
 import { EpisodeGrid } from "./Episodegrid";
-import { DiskName } from "../../types/Disk/Disk";
-import { Episode } from "../../types/Episodes/Episodes";
+import { DiskName } from "../../types/Disk/disk";
+import { Episode } from "../../types/Episodes/episodes";
 interface EpisodeSectionProps {
   searchQuery: string;
   selectedDiskColor: DiskName | null;

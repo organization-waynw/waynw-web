@@ -1,9 +1,9 @@
 import { disks } from "../../data/EPISODES";
-import { Episode } from "../../types/Episodes/Episodes";
+import { Episode } from "../../types/Episodes/episodes";
 import {
   DISK_SPIN_DURATION,
   getDiskAnimationDelay,
-} from "../../utils/DiskAnimation";
+} from "../../utils/diskAnimation";
 
 interface EpisodeGridProps {
   episodes: Episode[];

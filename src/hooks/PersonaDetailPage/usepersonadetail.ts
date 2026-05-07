@@ -1,12 +1,16 @@
 import { useState, useMemo, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "../../db/supabase";
-import { ExtraInfo, Persona } from "../../types/Persona/Persona";
-import { Episode } from "../../types/Episodes/Episodes";
-import { Disk, DiskName } from "../../types/Disk/Disk";
-import { getPersonaDetail, updatePersonaExtraInfo, updatePersonaProfile, updatePersonaSubInfo } from "../../api/PersonaDetail";
+import { ExtraInfo, Persona } from "../../types/Persona/persona";
+import { Episode } from "../../types/Episodes/episodes";
+import { Disk, DiskName } from "../../types/Disk/disk";
+import {
+  getPersonaDetail,
+  updatePersonaExtraInfo,
+  updatePersonaProfile,
+  updatePersonaSubInfo,
+} from "../../api/personaDetail";
 import { getDisks, getEpisodesByPersonaId } from "../../api/episodes";
-
 
 export function usePersonaDetail() {
   const { id } = useParams<{ id: string }>();
@@ -18,18 +22,19 @@ export function usePersonaDetail() {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
 
-  // ── 프로필 수정
+  // ── 수정 상태
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isEditingSubInfo, setIsEditingSubInfo] = useState(false);
+
+  // ── 프로필
   const [editedName, setEditedName] = useState("");
   const [editedTitle, setEditedTitle] = useState("");
-  const [editedProfileImg, setEditedProfileImg] = useState<string | null>(null); // base64
+  const [editedProfileImg, setEditedProfileImg] = useState<string | null>(null);
 
-  // ── 부가정보 수정
-  const [isEditingSubInfo, setIsEditingSubInfo] = useState(false);
+  // ── 부가정보
   const [editedSubInfo, setEditedSubInfo] = useState("");
 
-  // ── 추가정보 수정
-  const [isEditingExtraInfo, setIsEditingExtraInfo] = useState(false);
+  // ── 추가정보
   const [editedExtraInfo, setEditedExtraInfo] = useState<ExtraInfo[]>([]);
 
   // ── 에피소드 필터
@@ -44,11 +49,14 @@ export function usePersonaDetail() {
 
     const init = async () => {
       const { data: userData } = await supabase.auth.getUser();
+
       const uid = userData.user?.id;
+
       if (!uid) {
         navigate("/login");
         return;
       }
+
       setUserId(uid);
 
       const [personaData, episodeData, diskData] = await Promise.all([
@@ -71,37 +79,47 @@ export function usePersonaDetail() {
       setEditedTitle(personaData.title ?? "");
       setEditedSubInfo(personaData.sub_info ?? "");
       setEditedExtraInfo((personaData.extra_info as ExtraInfo[]) ?? []);
+
       setLoading(false);
     };
 
     init().catch(console.error);
-  }, [id]);
+  }, [id, navigate]);
 
-  // ── Esc 뒤로가기
+  // ESC 뒤로가기
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") navigate("/main");
+      if (e.key === "Escape") {
+        navigate("/main");
+      }
     };
+
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, [navigate]);
 
-  // ── 에피소드 필터링
+  // 에피소드 필터링
   const filteredEpisodes = useMemo(() => {
     let filtered = episodes;
+
     if (searchQuery.trim()) {
       filtered = filtered.filter((ep) =>
         ep.name?.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
+
     if (selectedDiskColor) {
       filtered = filtered.filter((ep) => {
         const disk = disks.find((d) => d.id === ep.disk_id);
         return disk?.name === selectedDiskColor;
       });
     }
+
     return filtered;
-  }, [episodes, searchQuery, selectedDiskColor]);
+  }, [episodes, searchQuery, selectedDiskColor, disks]);
 
   const activeDiskColors = useMemo(
     () =>
@@ -115,22 +133,71 @@ export function usePersonaDetail() {
     [episodes, disks],
   );
 
-  // Storage에서 이미지 public URL 가져오기
+  // Storage 이미지 URL
   const getProfileImgUrl = (path: string | null) => {
     if (!path) return null;
+
     const { data } = supabase.storage
       .from("persona_profile_img")
       .getPublicUrl(path);
+
     return data.publicUrl;
   };
 
   const displayImg =
     editedProfileImg ?? getProfileImgUrl(persona?.profile_img_path ?? null);
 
-  // ── 프로필 저장
-  const handleProfileSave = async () => {
+  // 이미지 변경
+  const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = (ev) => {
+      setEditedProfileImg(ev.target?.result as string);
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+  // 추가정보 수정
+  const handleExtraInfoChange = (
+    index: number,
+    field: keyof ExtraInfo,
+    value: string,
+  ) => {
+    const next = [...editedExtraInfo];
+
+    next[index] = {
+      ...next[index],
+      [field]: value,
+    };
+
+    setEditedExtraInfo(next);
+  };
+
+  const handleExtraInfoRemove = (index: number) => {
+    setEditedExtraInfo((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleExtraInfoAdd = () => {
+    setEditedExtraInfo((prev) => [
+      ...prev,
+      {
+        title: "",
+        content: "",
+      },
+    ]);
+  };
+
+  // 전체 저장
+  const handleAllSave = async () => {
     if (!id || !userId || !persona) return;
+
     try {
+      // 프로필 저장
       const newPath = await updatePersonaProfile({
         personaId: id,
         name: editedName,
@@ -139,46 +206,84 @@ export function usePersonaDetail() {
         userId,
         personaName: editedName,
       });
+
+      // 부가정보 저장
+      await updatePersonaSubInfo({
+        personaId: id,
+        subInfo: editedSubInfo,
+      });
+
+      // 추가정보 저장
+      await updatePersonaExtraInfo({
+        personaId: id,
+        extraInfo: editedExtraInfo,
+      });
+
+      // 로컬 상태 반영
       setPersona((prev) =>
         prev
           ? {
               ...prev,
               name: editedName,
               title: editedTitle,
-              ...(newPath ? { profile_img_path: newPath } : {}),
+              sub_info: editedSubInfo,
+              extra_info: editedExtraInfo,
+              ...(newPath
+                ? {
+                    profile_img_path: newPath,
+                  }
+                : {}),
             }
           : prev,
       );
+
       setEditedProfileImg(null);
       setIsEditingProfile(false);
     } catch (e) {
-      console.error("프로필 저장 실패:", e);
+      console.error("전체 저장 실패:", e);
     }
   };
 
-  const handleProfileCancel = () => {
-    setEditedName(persona?.name ?? "");
-    setEditedTitle(persona?.title ?? "");
+  // 전체 취소
+  const handleAllCancel = () => {
+    if (!persona) return;
+
+    setEditedName(persona.name ?? "");
+    setEditedTitle(persona.title ?? "");
+    setEditedSubInfo(persona.sub_info ?? "");
+    setEditedExtraInfo((persona.extra_info as ExtraInfo[]) ?? []);
     setEditedProfileImg(null);
+
     setIsEditingProfile(false);
   };
 
-  const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => setEditedProfileImg(ev.target?.result as string);
-    reader.readAsDataURL(file);
+  const handleGoCreateEpisode = () => {
+    navigate(`/persona/${id}/episode/create`);
   };
 
-  // ── 부가정보 저장
+  const handleGoEpisodeDetail = (episodeId: string) => {
+    navigate(`/persona/${id}/episode/${episodeId}`);
+  };
+
+  //부가정보 수정
   const handleSubInfoSave = async () => {
     if (!id) return;
+
     try {
-      await updatePersonaSubInfo({ personaId: id, subInfo: editedSubInfo });
+      await updatePersonaSubInfo({
+        personaId: id,
+        subInfo: editedSubInfo,
+      });
+
       setPersona((prev) =>
-        prev ? { ...prev, sub_info: editedSubInfo } : prev,
+        prev
+          ? {
+              ...prev,
+              sub_info: editedSubInfo,
+            }
+          : prev,
       );
+
       setIsEditingSubInfo(false);
     } catch (e) {
       console.error("부가정보 저장 실패:", e);
@@ -190,82 +295,43 @@ export function usePersonaDetail() {
     setIsEditingSubInfo(false);
   };
 
-  // ── 추가정보 저장
-  const handleExtraInfoSave = async () => {
-    if (!id) return;
-    try {
-      await updatePersonaExtraInfo({
-        personaId: id,
-        extraInfo: editedExtraInfo,
-      });
-      setPersona((prev) =>
-        prev ? { ...prev, extra_info: editedExtraInfo } : prev,
-      );
-      setIsEditingExtraInfo(false);
-    } catch (e) {
-      console.error("추가정보 저장 실패:", e);
-    }
-  };
-
-  const handleExtraInfoChange = (
-    index: number,
-    field: keyof ExtraInfo,
-    value: string,
-  ) => {
-    const next = [...editedExtraInfo];
-    next[index] = { ...next[index], [field]: value };
-    setEditedExtraInfo(next);
-  };
-
-  const handleExtraInfoRemove = (index: number) => {
-    setEditedExtraInfo(editedExtraInfo.filter((_, i) => i !== index));
-  };
-
-  const handleExtraInfoAdd = () => {
-    setEditedExtraInfo([...editedExtraInfo, { title: "", content: "" }]);
-  };
-
-  const handleExtraInfoCancel = () => {
-    setEditedExtraInfo((persona?.extra_info as ExtraInfo[]) ?? []);
-    setIsEditingExtraInfo(false);
-  };
-
-  const handleGoCreateEpisode = () => navigate(`/persona/${id}/episode/create`);
-  const handleGoEpisodeDetail = (episodeId: string) =>
-    navigate(`/persona/${id}/episode/${episodeId}`);
-
   return {
     id,
     persona,
     loading,
     navigate,
-    // 프로필
+
+    // 통합 수정
     isEditingProfile,
     setIsEditingProfile,
+    isEditingSubInfo,
+    setIsEditingSubInfo,
+
+    // 프로필
     editedName,
     setEditedName,
     editedTitle,
     setEditedTitle,
     displayImg,
-    handleProfileSave,
-    handleProfileCancel,
     handleProfileImageChange,
+
     // 부가정보
-    isEditingSubInfo,
-    setIsEditingSubInfo,
     editedSubInfo,
     setEditedSubInfo,
-    handleSubInfoSave,
-    handleSubInfoCancel,
+
     // 추가정보
-    isEditingExtraInfo,
-    setIsEditingExtraInfo,
     editedExtraInfo,
     handleExtraInfoChange,
     handleExtraInfoRemove,
     handleExtraInfoAdd,
-    handleExtraInfoSave,
-    handleExtraInfoCancel,
+
+    // 저장 / 취소
+    handleAllSave,
+    handleAllCancel,
+    handleSubInfoSave,
+
+    handleSubInfoCancel,
+
     // 에피소드
     searchQuery,
     setSearchQuery,

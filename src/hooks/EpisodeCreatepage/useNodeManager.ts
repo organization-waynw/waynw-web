@@ -8,7 +8,7 @@ import {
   DEFAULT_NODE_EXPLANATION,
   DEFAULT_NODE_NAME,
 } from "../../constants/episodeCreate.constants";
-import { EpisodeNode } from "../../types/Episodes/Episodes";
+import { EpisodeNode } from "../../types/Episodes/episodes";
 
 export function useNodeManager() {
   const [nodes, setNodes] = useState<EpisodeNode[]>([]);

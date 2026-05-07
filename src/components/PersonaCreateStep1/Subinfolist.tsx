@@ -1,4 +1,4 @@
-import { SubInfo } from "../../types/Persona/Personacreate1.types";
+import { SubInfo } from "../../types/Persona/personacreate1.types";
 
 interface SubInfoListProps {
   subInfos: SubInfo[];

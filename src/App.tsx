@@ -1,13 +1,13 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
-import MainPage from "./pages/MainPage";
-import PersonaDetailPage from "./pages/PersonaDetailPage";
-import EpisodeDetailpage from "./pages/EpisodeDetailpage";
-import EpisodeCreatepage from "./pages/EpisodeCreatepage";
-import PersonaCreateStep2 from "./pages/PersonaCreateStep2";
-import PersonaCreateStep1 from "./pages/PersonaCreateStep1";
+import LoginPage from "./pages/loginPage";
+import SignupPage from "./pages/signupPage";
+import MainPage from "./pages/mainPage";
+import PersonaDetailPage from "./pages/personaDetailPage";
+import EpisodeDetailpage from "./pages/episodeDetailpage";
+import EpisodeCreatepage from "./pages/episodeCreatepage";
+import PersonaCreateStep2 from "./pages/personaCreateStep2";
+import PersonaCreateStep1 from "./pages/personaCreateStep1";
 
 function App() {
   return (

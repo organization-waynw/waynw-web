@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { getPersonas } from "../../api/MainPage";
+import { getPersonas } from "../../api/mainPage";
 import { supabase } from "../../db/supabase";
-import { Persona } from "../../types/Persona/Persona";
+import { Persona } from "../../types/Persona/persona";
 
 export function usePersonas() {
   const [personas, setPersonas] = useState<Persona[]>([]);

@@ -1,17 +1,12 @@
-/**
- * DetailSaveZone
- * 에피소드 상세 페이지의 드래그 드롭 저장 영역
- */
-
-import { Save } from "lucide-react";
 import { forwardRef } from "react";
+import { Save } from "lucide-react";
 
-interface DetailSaveZoneProps {
+interface EpisodeSaveZoneProps {
   isDragging: boolean;
   isOverSaveZone: boolean;
 }
 
-export const DetailSaveZone = forwardRef<HTMLDivElement, DetailSaveZoneProps>(
+export const EpisodeSaveZone = forwardRef<HTMLDivElement, EpisodeSaveZoneProps>(
   ({ isDragging, isOverSaveZone }, ref) => {
     return (
       <div
@@ -26,7 +21,7 @@ export const DetailSaveZone = forwardRef<HTMLDivElement, DetailSaveZoneProps>(
           backdropFilter: "blur(8px)",
         }}
       >
-        <div className="flex flex-col items-center gap-3 text-white select-none">
+        <div className="flex flex-col items-center gap-3 select-none">
           <Save
             className="w-8 h-8 transition-transform duration-200"
             style={{

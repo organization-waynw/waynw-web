@@ -4,12 +4,12 @@
  */
 
 import { RefObject } from "react";
-import { DISK_SPIN_DURATION } from "../../utils/DiskAnimation";
+import { DISK_SPIN_DURATION } from "../../utils/diskAnimation";
 import {
   DISK_SIZE,
   DISK_VISIBLE,
 } from "../../constants/episodeCreate.constants";
-import { Disk } from "../../types/Episodes/Episodes";
+import { Disk } from "../../types/Episodes/episodes";
 
 interface DiskSectionProps {
   currentDisk: Disk | undefined;

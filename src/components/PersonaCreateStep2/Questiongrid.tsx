@@ -1,4 +1,4 @@
-import { AnswersMap } from "../../types/Persona/Personacreate2.types";
+import { AnswersMap } from "../../types/Persona/personacreate2.types";
 import { CustomOptionCard } from "./Customoptioncard";
 
 interface Option {

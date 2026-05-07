@@ -1,4 +1,5 @@
-import { Disk, Episode, EpisodeNode } from "../types/Episodes/Episodes";
+import { Disk } from "../types/Disk/disk";
+import { Episode, EpisodeNode } from "../types/Episodes/episodes";
 
 export const disks: Disk[] = [
   {

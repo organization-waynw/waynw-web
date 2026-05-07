@@ -8,41 +8,61 @@ function PersonaDetailPage() {
   const {
     persona,
     navigate,
-    // 프로필
+    loading,
+
+    // 프로필 + 추가정보 수정
     isEditingProfile,
     setIsEditingProfile,
+
     editedName,
     setEditedName,
+
     editedTitle,
     setEditedTitle,
+
     displayImg,
-    handleProfileSave,
-    handleProfileCancel,
+
     handleProfileImageChange,
-    // 부가정보
-    isEditingSubInfo,
-    setIsEditingSubInfo,
-    editedSubInfo,
-    setEditedSubInfo,
-    handleSubInfoCancel,
-    // 추가정보
-    isEditingExtraInfo,
-    setIsEditingExtraInfo,
+
     editedExtraInfo,
     handleExtraInfoChange,
     handleExtraInfoRemove,
     handleExtraInfoAdd,
-    handleExtraInfoCancel,
+
+    handleAllSave,
+    handleAllCancel,
+
+    // 부가정보 수정
+    isEditingSubInfo,
+    setIsEditingSubInfo,
+
+    editedSubInfo,
+    setEditedSubInfo,
+
+    handleSubInfoSave,
+    handleSubInfoCancel,
+
     // 에피소드
     searchQuery,
     setSearchQuery,
+
     selectedDiskColor,
     setSelectedDiskColor,
+
     filteredEpisodes,
     activeDiskColors,
+
     handleGoCreateEpisode,
     handleGoEpisodeDetail,
   } = usePersonaDetail();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#ECF0F9] flex items-center justify-center">
+        <p className="text-gray-500">로딩중 입니다.</p>
+      </div>
+    );
+  }
 
   if (!persona) {
     return (
@@ -60,24 +80,20 @@ function PersonaDetailPage() {
         {/* 상단 2열 */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <ProfileCard
-            isEditingProfile={isEditingProfile}
+            isEditing={isEditingProfile}
             editedName={editedName}
             editedTitle={editedTitle}
             displayImg={displayImg}
-            isEditingExtraInfo={isEditingExtraInfo}
             editedExtraInfo={editedExtraInfo}
-            onEditProfileStart={() => setIsEditingProfile(true)}
+            onEditStart={() => setIsEditingProfile(true)}
             onNameChange={setEditedName}
             onTitleChange={setEditedTitle}
             onImageChange={handleProfileImageChange}
-            onProfileSave={handleProfileSave}
-            onProfileCancel={handleProfileCancel}
-            onEditExtraInfoStart={() => setIsEditingExtraInfo(true)}
+            onSave={handleAllSave}
+            onCancel={handleAllCancel}
             onExtraInfoChange={handleExtraInfoChange}
             onExtraInfoRemove={handleExtraInfoRemove}
             onExtraInfoAdd={handleExtraInfoAdd}
-            onExtraInfoSave={() => setIsEditingExtraInfo(false)}
-            onExtraInfoCancel={handleExtraInfoCancel}
           />
 
           <SubInfoCard
@@ -85,7 +101,7 @@ function PersonaDetailPage() {
             editedSubInfo={editedSubInfo}
             onEditStart={() => setIsEditingSubInfo(true)}
             onInfoChange={setEditedSubInfo}
-            onSave={() => setIsEditingSubInfo(false)}
+            onSave={handleSubInfoSave}
             onCancel={handleSubInfoCancel}
           />
         </div>
@@ -105,8 +121,13 @@ function PersonaDetailPage() {
 
       <style>{`
         @keyframes diskSpin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+          from {
+            transform: rotate(0deg);
+          }
+
+          to {
+            transform: rotate(360deg);
+          }
         }
       `}</style>
     </div>

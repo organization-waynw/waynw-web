@@ -3,7 +3,7 @@
  * 노드 조회 중인 상태: 읽기 전용 표시
  */
 
-import { EpisodeNode } from "../../types/Episodes/Episodes";
+import { EpisodeNode } from "../../types/Episodes/episodes";
 
 interface NodeViewPanelProps {
   node: EpisodeNode;

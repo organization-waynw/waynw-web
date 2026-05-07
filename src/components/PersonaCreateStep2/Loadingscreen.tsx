@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import otherItems from "../../assets/images/persona/create/question/other_items.png";
 import { QUESTIONS } from "../../data/QUESTIONS";
 import { QUOTES } from "../../data/QUOTES";
-import { AnswersMap } from "../../types/Persona/Personacreate2.types";
+import { AnswersMap } from "../../types/Persona/personacreate2.types";
 
 interface LoadingScreenProps {
   answers: AnswersMap;

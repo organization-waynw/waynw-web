@@ -6,9 +6,10 @@ function AddPersonaCard() {
   return (
     <div
       onClick={() => navigate("/persona/create")}
-      className="hover:scale-[1.02] active:scale-[0.98] overflow-hidden transition-shadow bg-white shadow-sm cursor-pointer rounded-2xl hover:shadow-md border-2 border-dashed border-gray-300 hover:border-[#0F1C46] group"
+      className="cursor-pointer group"
     >
-      <div className="p-6 h-full flex items-center justify-center min-h-[112px]">
+      {/* 앨범 커버 영역 */}
+      <div className="relative w-full aspect-square overflow-hidden rounded-2xl border-2 border-dashed border-gray-300 group-hover:border-[#0F1C46] group-hover:scale-[1.02] group-active:scale-[0.98] transition-all flex items-center justify-center bg-white">
         <div className="flex flex-col items-center gap-2 text-gray-400 group-hover:text-[#0F1C46] transition-colors">
           <div className="flex items-center justify-center w-12 h-12 border-2 border-current rounded-full">
             <svg
@@ -24,8 +25,14 @@ function AddPersonaCard() {
               <line x1="5" y1="12" x2="19" y2="12" />
             </svg>
           </div>
-          <span className="text-sm font-medium">페르소나 추가</span>
         </div>
+      </div>
+
+      {/* 텍스트 */}
+      <div className="px-1 mt-2">
+        <p className="text-sm font-semibold text-gray-400 group-hover:text-[#0F1C46] transition-colors">
+          페르소나 추가
+        </p>
       </div>
     </div>
   );

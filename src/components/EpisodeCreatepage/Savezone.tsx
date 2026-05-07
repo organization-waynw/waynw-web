@@ -12,9 +12,7 @@ interface SaveZoneProps {
 }
 
 export const SaveZone = forwardRef<HTMLDivElement, SaveZoneProps>(
-   ({ isDragging, isOverSaveZone }, ref) => {
-
-    console.log(isOverSaveZone);
+  ({ isDragging, isOverSaveZone }, ref) => {
     return (
       <div
         ref={ref}
@@ -45,5 +43,5 @@ export const SaveZone = forwardRef<HTMLDivElement, SaveZoneProps>(
         </div>
       </div>
     );
-  }
-)
+  },
+);

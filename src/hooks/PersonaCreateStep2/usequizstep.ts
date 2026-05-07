@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { QUESTIONS } from "../../data/QUESTIONS";
-import { AnswersMap } from "../../types/Persona/Personacreate2.types";
+import { AnswersMap } from "../../types/Persona/personacreate2.types";
 import { supabase } from "../../db/supabase";
 import { createPersona, uploadProfileImage } from "../../api/persona";
 
@@ -76,12 +76,20 @@ export function useQuizStep() {
     }
   };
 
-
   const handleSubmit = async () => {
     setIsLoading(true);
     try {
-      const step1Data = JSON.parse(sessionStorage.getItem("personaFormStep1") || "{}");
-      const { name, title, additionalInfo, subInfos, profileImagePreview, autoGenerate } = step1Data;
+      const step1Data = JSON.parse(
+        sessionStorage.getItem("personaFormStep1") || "{}",
+      );
+      const {
+        name,
+        title,
+        additionalInfo,
+        subInfos,
+        profileImagePreview,
+        autoGenerate,
+      } = step1Data;
 
       const finalAnswers = structuredClone(answers);
 
@@ -90,7 +98,9 @@ export function useQuizStep() {
         const ans = finalAnswers[q.id];
         if (!ans) return "";
         const opt = q.options[ans.optionIndex];
-        return (opt as any).isCustom ? (ans.customText ?? "") : opt.promptKeywords;
+        return (opt as any).isCustom
+          ? (ans.customText ?? "")
+          : opt.promptKeywords;
       })
         .filter(Boolean)
         .join(", ");
@@ -101,57 +111,62 @@ export function useQuizStep() {
       if (!userId) throw new Error("로그인이 필요합니다.");
 
       // 1) AI로 sub_info 생성
-      const { data: descData, error: descError } = await supabase.functions.invoke(
-        "generate-persona-description",
-        { body: { answers: finalAnswers, promptKeywords, additionalInfo } },
-      );
+      const { data: descData, error: descError } =
+        await supabase.functions.invoke("generate-persona-description", {
+          body: { answers: finalAnswers, promptKeywords, additionalInfo },
+        });
       if (descError) throw descError;
       const subInfo: string = descData.description;
 
-      // 2) personas INSERT (id 먼저 필요)
+      // 2) personas INSERT
       const persona = await createPersona({
         name,
         title,
         subInfo,
         extraInfo: subInfos,
-        profileImgPath: null, // 이미지 업로드 후 업데이트
+        profileImgPath: null,
         userId,
       });
 
       // 3) 프로필 이미지 처리
-      let profileImgPath: string | null = null;
+      let profileImgUrl: string | null = null;
 
       if (autoGenerate) {
-        // AI 이미지 생성
-        const { data: imgData, error: imgError } = await supabase.functions.invoke(
-          "generate-persona-image",
-          { body: { promptKeywords, userId, personaId: persona.id, personaName: name } },
-        );
+        // AI 이미지 생성 (Edge Function 내부에서 스토리지 저장 + DB 업데이트까지 완료)
+        const { data: imgData, error: imgError } =
+          await supabase.functions.invoke("generate-persona-image", {
+            body: {
+              promptKeywords,
+              userId,
+              personaId: persona.id,
+              personaName: name,
+            },
+          });
         if (imgError) throw imgError;
-        profileImgPath = imgData.path;
+        profileImgUrl = imgData.publicUrl;
       } else if (profileImagePreview) {
         // 유저 업로드 이미지
-        profileImgPath = await uploadProfileImage({
+        profileImgUrl = await uploadProfileImage({
           base64: profileImagePreview,
           userId,
           personaId: persona.id,
           personaName: name,
         });
+
+        // 유저 업로드의 경우 Edge Function을 거치지 않으므로 직접 DB 업데이트
+        if (profileImgUrl) {
+          await supabase
+            .from("personas")
+            .update({ profile_img_path: profileImgUrl })
+            .eq("id", persona.id);
+        }
       }
 
-      // 4) profile_img_path 업데이트
-      if (profileImgPath) {
-        await supabase
-          .from("personas")
-          .update({ profile_img_path: profileImgPath })
-          .eq("id", persona.id);
-      }
-
-      // 5) 완료
+      // 4) 완료
       sessionStorage.removeItem("personaFormStep1");
       navigate("/main");
     } catch (e) {
-      console.error("페르소나 생성 실패:", e);
+      console.error("페르소나 생성 실패:", JSON.stringify(e, null, 2)); // ← JSON.stringify로 변경
       alert("페르소나 생성 중 오류가 발생했습니다.");
     } finally {
       setIsLoading(false);

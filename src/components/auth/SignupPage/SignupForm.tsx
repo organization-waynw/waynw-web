@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LoginField from "../LoginField";
-import { signUp } from "../../../api/SignupPage";
+import { signUp } from "../../../api/auth";
 
 function SignupForm() {
   const navigate = useNavigate();

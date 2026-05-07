@@ -1,5 +1,5 @@
 import { supabase } from "../db/supabase";
-import { Persona } from "../types/Persona/Persona";
+import { Persona } from "../types/Persona/persona";
 
 export async function createPersona(params: {
   name: string;

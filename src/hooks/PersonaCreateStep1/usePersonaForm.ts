@@ -4,7 +4,7 @@ import { STEP1_SESSION_KEY } from "../../constants/personaCreateStep1.constants"
 import {
   PersonaFormData,
   SubInfo,
-} from "../../types/Persona/Personacreate1.types";
+} from "../../types/Persona/personacreate1.types";
 
 export function usePersonaForm() {
   const navigate = useNavigate();

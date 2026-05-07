@@ -1,5 +1,5 @@
 import { supabase } from "../db/supabase";
-import { Persona, ExtraInfo } from "../types/Persona/Persona";
+import { Persona, ExtraInfo } from "../types/Persona/persona";
 
 function base64ToBytes(base64: string): Uint8Array {
   const base64Data = base64.split(",")[1];

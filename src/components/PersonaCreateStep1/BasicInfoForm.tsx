@@ -1,4 +1,4 @@
-import { SubInfo } from "../../types/Persona/Personacreate1.types";
+import { SubInfo } from "../../types/Persona/personacreate1.types";
 import { SubInfoList } from "./Subinfolist";
 
 interface BasicInfoFormProps {

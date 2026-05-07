@@ -1,7 +1,6 @@
 // interface는 추후 types로 분리
 
-import { Persona } from "../types/Persona/Persona";
-
+import { Persona } from "../types/Persona/persona";
 
 export const personas: Persona[] = [
   {

@@ -4,7 +4,7 @@
  */
 
 import { useState, useCallback } from "react";
-import { Episode } from "../../types/Episodes/Episodes";
+import { Episode } from "../../types/Episodes/episodes";
 
 interface UseDetailEpisodeInfoOptions {
   episode?: Episode;
@@ -29,6 +29,17 @@ export function useDetailEpisodeInfo({
   // 부가정보 편집
   const [isEditingSubInfo, setIsEditingSubInfo] = useState(false);
   const [editedSubInfo, setEditedSubInfo] = useState(episode?.sub_info ?? "");
+
+  /**
+   * episode 로드 후 전체 초기화 - 페이지에서 episode 로드 완료 시 호출
+   */
+  const reset = useCallback((ep: Episode) => {
+    setDisplayName(ep.name ?? "");
+    setDisplayExplanation(ep.one_line_explanation ?? "");
+    setEditEpisodeName(ep.name ?? "");
+    setEditEpisodeExplanation(ep.one_line_explanation ?? "");
+    setEditedSubInfo(ep.sub_info ?? "");
+  }, []);
 
   /**
    * 에피소드 정보 저장
@@ -66,6 +77,7 @@ export function useDetailEpisodeInfo({
   }, [episode?.sub_info]);
 
   return {
+    reset,
     // 에피소드 제목/설명
     isEditingEpisode,
     setIsEditingEpisode,
@@ -85,5 +97,7 @@ export function useDetailEpisodeInfo({
     setEditedSubInfo,
     handleSubInfoSave,
     handleSubInfoCancel,
+    setDisplayName,
+    setDisplayExplanation,
   };
 }

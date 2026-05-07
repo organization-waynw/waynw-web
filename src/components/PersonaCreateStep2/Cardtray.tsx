@@ -1,6 +1,6 @@
 import otherItems from "../../assets/images/persona/create/question/other_items.png";
 import { QUESTIONS } from "../../data/QUESTIONS";
-import { AnswersMap } from "../../types/Persona/Personacreate2.types";
+import { AnswersMap } from "../../types/Persona/personacreate2.types";
 
 function getSelectedImagePath(
   answers: AnswersMap,

@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Info } from "lucide-react";
-import { ChatMessage } from "./ChatOverlay/ChatMessage";
 import { CommandTextarea } from "./ChatOverlay/CommandTextarea";
 import { OveruseModal } from "./ChatOverlay/OveruseModal";
 import { useCommandInput } from "../../hooks/MainPage/ChatOverlay/useCommandInput";
 import { useChatSocket } from "../../hooks/MainPage/ChatOverlay/useChatSocket";
 import { useChatSend } from "../../hooks/MainPage/ChatOverlay/useChatSend";
+import ChatMessage from "./ChatOverlay/ChatMessage/ChatMessage";
 
 interface ChatOverlayProps {
   personaId: string;
@@ -24,14 +24,6 @@ export default function ChatOverlay({
   const { wsRef, messages, setMessages, isStreaming, streamingIdRef } =
     useChatSocket(WS_URL);
 
-  const { sendMessage, abort } = useChatSend({
-    wsRef,
-    messages,
-    setMessages,
-    isStreaming,
-    personaId,
-  });
-
   const {
     input,
     setInput,
@@ -45,24 +37,43 @@ export default function ChatOverlay({
   } = useCommandInput();
 
   // ── UI 상태 ───────────────────────────────────────
-
   const [visible, setVisible] = useState(false);
   const [showModal, setShowModal] = useState(false);
+
+  // ── Refs ──────────────────────────────────────────
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // ── 파생 상태 ─────────────────────────────────────
   const hasMessages = messages.length > 0;
 
-  // ── Mount / scroll / ESC ──────────────────────────
+  // ── 채팅 전송 ─────────────────────────────────────
+  // 15배수 도달 시 OveruseModal 표시
+  const handleOveruse = useCallback(() => {
+    setShowModal(true);
+  }, []);
 
+  const { sendMessage, abort } = useChatSend({
+    wsRef,
+    messages,
+    setMessages,
+    isStreaming,
+    personaId,
+    onOveruse: handleOveruse,
+  });
+
+  // ── 마운트 애니메이션 + 포커스 ────────────────────
   useEffect(() => {
     requestAnimationFrame(() => setVisible(true));
     inputRef.current?.focus();
   }, []);
 
+  // ── 새 메시지 도착 시 스크롤 하단 이동 ───────────
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // ── 페이지 이탈 방지 (메시지 있을 때) ────────────
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
       if (hasMessages) {
@@ -74,6 +85,8 @@ export default function ChatOverlay({
     return () => window.removeEventListener("beforeunload", handler);
   }, [hasMessages]);
 
+  // ── ESC 키로 오버레이 닫기 ────────────────────────
+  // 단, OveruseModal이 열려있으면 닫지 않음
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -85,13 +98,13 @@ export default function ChatOverlay({
     return () => window.removeEventListener("keydown", handler);
   }, [showModal]);
 
+  // ── 오버레이 닫기 (페이드 아웃 후 onClose 호출) ──
   const handleClose = useCallback(() => {
     setVisible(false);
     setTimeout(onClose, 350);
   }, [onClose]);
 
-  // ── 이벤트 ────────────────────────────────────────
-
+  // ── 메시지 전송 ───────────────────────────────────
   const handleSend = () => {
     sendMessage(
       input,
@@ -100,6 +113,9 @@ export default function ChatOverlay({
     );
   };
 
+  // ── 키보드 이벤트 ─────────────────────────────────
+  // 커맨드 팔레트가 열려있으면 방향키/Enter/ESC로 팔레트 제어
+  // 팔레트가 닫혀있으면 Enter로 메시지 전송 (Shift+Enter는 줄바꿈)
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (commandPalette && filteredCommands.length > 0) {
       if (e.key === "ArrowDown") {
@@ -107,7 +123,6 @@ export default function ChatOverlay({
         setSelectedIndex((i) => (i + 1) % filteredCommands.length);
         return;
       }
-
       if (e.key === "ArrowUp") {
         e.preventDefault();
         setSelectedIndex(
@@ -115,13 +130,11 @@ export default function ChatOverlay({
         );
         return;
       }
-
       if (e.key === "Enter") {
         e.preventDefault();
         applyCommand(filteredCommands[selectedIndex]);
         return;
       }
-
       if (e.key === "Escape") {
         e.preventDefault();
         setCommandPalette(false);

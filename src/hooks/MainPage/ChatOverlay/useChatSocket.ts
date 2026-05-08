@@ -1,6 +1,5 @@
-// hooks/useChatSocket.ts
 import { useEffect, useRef, useState } from "react";
-import { Message, generateId } from "../../../types/Chat/chat";
+import { generateId, Message } from "../../../types/Chat/Chat";
 
 export function useChatSocket(url: string) {
   const wsRef = useRef<WebSocket | null>(null);
@@ -8,42 +7,77 @@ export function useChatSocket(url: string) {
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const ws = new WebSocket(url);
-    wsRef.current = ws;
+    let ws: WebSocket;
+    let closed = false;
 
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
+    const connect = () => {
+      ws = new WebSocket(url);
+      wsRef.current = ws;
 
-      if (data.type === "stream_start") {
-        const id = generateId();
-        streamingIdRef.current = id;
-        setIsStreaming(true);
+      ws.onopen = () => {
+        if (closed) {
+          ws.close();
+          return;
+        }
+        console.log("[WS] connected", ws.readyState);
+        setIsConnected(true);
+      };
 
-        setMessages((prev) => [
-          ...prev,
-          { id, role: "assistant", text: "", timestamp: new Date() },
-        ]);
-      }
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
 
-      if (data.type === "stream_chunk") {
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === streamingIdRef.current
-              ? { ...m, text: m.text + data.chunk }
-              : m,
-          ),
-        );
-      }
+        if (data.type === "stream_start") {
+          const id = generateId();
+          streamingIdRef.current = id;
+          setIsStreaming(true);
+          setMessages((prev) => [
+            ...prev,
+            { id, role: "assistant", text: "", timestamp: new Date() },
+          ]);
+        }
 
-      if (data.type === "stream_end" || data.type === "aborted") {
-        streamingIdRef.current = null;
-        setIsStreaming(false);
-      }
+        if (data.type === "stream_chunk") {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === streamingIdRef.current
+                ? { ...m, text: m.text + data.chunk }
+                : m,
+            ),
+          );
+        }
+
+        if (data.type === "stream_end" || data.type === "aborted") {
+          streamingIdRef.current = null;
+          setIsStreaming(false);
+        }
+
+        if (data.type === "error") {
+          console.error("[WS] server error:", data.message);
+          streamingIdRef.current = null;
+          setIsStreaming(false);
+        }
+      };
+
+      ws.onclose = () => {
+        console.log("[WS] closed", ws.readyState);
+        setIsConnected(false);
+      };
+
+      ws.onerror = (e) => {
+        console.error("[WS] error", e);
+      };
     };
 
-    return () => ws.close();
+    connect();
+
+    return () => {
+      closed = true;
+      ws?.close();
+      wsRef.current = null;
+    };
   }, [url]);
 
   return {
@@ -51,6 +85,7 @@ export function useChatSocket(url: string) {
     messages,
     setMessages,
     isStreaming,
+    isConnected,
     streamingIdRef,
   };
 }

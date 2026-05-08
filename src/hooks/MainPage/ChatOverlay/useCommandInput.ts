@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { COMMANDS, Command } from "../../../types/Chat/chat";
+import { Command, COMMANDS } from "../../../types/Chat/Chat";
 
 export function useCommandInput() {
   const [input, setInput] = useState("");

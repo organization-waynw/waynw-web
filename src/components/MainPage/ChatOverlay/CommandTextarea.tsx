@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { COMMAND_LABELS } from "../../../types/Chat/chat";
+import { COMMAND_LABELS } from "../../../types/Chat/Chat";
 
 const LINE_HEIGHT = 22;
 const MAX_ROWS = 5;

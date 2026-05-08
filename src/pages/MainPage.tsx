@@ -47,7 +47,7 @@ function MainPage() {
 
       {activeChatPersona && (
         <ChatOverlay
-          personaId={activeChatPersona.id} // 추가
+          personaId={activeChatPersona.id} 
           personaName={activeChatPersona.name}
           onClose={() => setActiveChatPersona(null)}
         />

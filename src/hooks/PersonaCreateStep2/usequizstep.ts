@@ -150,7 +150,6 @@ export function useQuizStep() {
           base64: profileImagePreview,
           userId,
           personaId: persona.id,
-          personaName: name,
         });
 
         // 유저 업로드의 경우 Edge Function을 거치지 않으므로 직접 DB 업데이트

@@ -31,9 +31,8 @@ export async function uploadProfileImage(params: {
   base64: string; // "data:image/png;base64,..." 형태
   userId: string;
   personaId: string;
-  personaName: string;
 }): Promise<string> {
-  const { base64, userId, personaId, personaName } = params;
+  const { base64, userId, personaId } = params;
 
   // data URL에서 순수 base64만 추출
   const base64Data = base64.split(",")[1];
@@ -41,7 +40,7 @@ export async function uploadProfileImage(params: {
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
 
-  const filePath = `${userId}/${personaId}/${personaName}.png`;
+  const filePath = `${userId}/${personaId}/${crypto.randomUUID()}.png`;
 
   const { error } = await supabase.storage
     .from("persona_profile_img")

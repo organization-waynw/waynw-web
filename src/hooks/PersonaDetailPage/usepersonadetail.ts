@@ -204,7 +204,6 @@ export function usePersonaDetail() {
         title: editedTitle,
         profileImgBase64: editedProfileImg,
         userId,
-        personaName: editedName,
       });
 
       // 부가정보 저장

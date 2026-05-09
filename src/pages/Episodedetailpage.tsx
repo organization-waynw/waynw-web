@@ -15,15 +15,14 @@ import { useDetailNodeManager } from "../hooks/EpisodeDetailpage/useDetailNodeMa
 import { useDetailNodeDnD } from "../hooks/EpisodeDetailpage/useDetailNodeDnD";
 import { useDetailDiskAudio } from "../hooks/EpisodeDetailpage/useDetailDiskAudio";
 import { useDetailDiskDrag } from "../hooks/EpisodeDetailpage/useDetailDiskDrag";
-
 import { EpisodeDetailHeader } from "../components/EpisodeDetailpage/episodeDetailHeader";
 import { EpisodeDetailInfoInput } from "../components/EpisodeDetailpage/episodeDetailInfoInput";
-import { EpisodeNodeTimeline } from "../components/EpisodeDetailpage/EpisodeNodeTimeline";
 import { EpisodeSubInfo } from "../components/EpisodeDetailpage/episodeSubInfo";
 import { EpisodeDeleteZone } from "../components/EpisodeDetailpage/episodeDeleteZone";
 import { EpisodeDiskSection } from "../components/EpisodeDetailpage/EpisodeDiskSection";
 import { EpisodeDiskModal } from "../components/EpisodeDetailpage/EpisodeDiskModal";
-import { EpisodeSaveZone } from "../components/EpisodeDetailpage/EpisodeSaveZone";
+import { EpisodeSaveZone } from "../components/EpisodeDetailpage/episodeSaveZone";
+import { EpisodeNodeTimeline } from "../components/EpisodeDetailpage/episodeNodeTimeline";
 
 const DISK_SIZE = 560;
 const DISK_VISIBLE = DISK_SIZE / 2;

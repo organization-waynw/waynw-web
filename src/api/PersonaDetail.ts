@@ -17,12 +17,11 @@ async function uploadProfileImageInternal(params: {
   base64: string;
   userId: string;
   personaId: string;
-  personaName: string;
 }): Promise<string> {
-  const { base64, userId, personaId, personaName } = params;
+  const { base64, userId, personaId } = params;
 
   const bytes = base64ToBytes(base64);
-  const filePath = `${userId}/${personaId}/${personaName}.png`;
+  const filePath = `${userId}/${personaId}/${crypto.randomUUID()}.png`;
 
   const { error } = await supabase.storage
     .from("persona_profile_img")
@@ -104,9 +103,8 @@ export async function updatePersonaProfile(params: {
   title: string;
   profileImgBase64?: string | null;
   userId: string;
-  personaName: string;
 }): Promise<string | null> {
-  const { personaId, name, title, profileImgBase64, userId, personaName } =
+  const { personaId, name, title, profileImgBase64, userId } =
     params;
 
   let profileImgPath: string | null = null;
@@ -116,7 +114,6 @@ export async function updatePersonaProfile(params: {
       base64: profileImgBase64,
       userId,
       personaId,
-      personaName,
     });
   }
 

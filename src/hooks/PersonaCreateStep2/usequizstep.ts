@@ -85,61 +85,63 @@ export function useQuizStep() {
       const {
         name,
         title,
-        additionalInfo,
-        subInfos,
+        additionalInfo, // → sub_info로 바로 저장
+        subInfos, // → extra_info로 바로 저장
         profileImagePreview,
         autoGenerate,
       } = step1Data;
 
       const finalAnswers = structuredClone(answers);
 
-      // promptKeywords 조합
-      const promptKeywords = QUESTIONS.map((q) => {
+      // 질문별 키워드를 __promptKey__ 고정 타이틀로 extra_info에 추가
+      const promptExtraInfo = QUESTIONS.map((q) => {
         const ans = finalAnswers[q.id];
-        if (!ans) return "";
+        if (!ans) return null;
         const opt = q.options[ans.optionIndex];
-        return (opt as any).isCustom
+        const keywords = (opt as any).isCustom
           ? (ans.customText ?? "")
           : opt.promptKeywords;
-      })
-        .filter(Boolean)
-        .join(", ");
+        return {
+          title: `__${q.promptKey}__`, // ex) __mood__, __expression__, __item__, __vibe__
+          content: keywords,
+        };
+      }).filter(Boolean);
+
+      // extra_info = 유저 입력 정보 + 프롬프트 키워드 (구분 가능하도록 __ prefix)
+      const mergedExtraInfo = [...(subInfos ?? []), ...promptExtraInfo];
 
       // 유저 정보
       const { data: userData } = await supabase.auth.getUser();
       const userId = userData.user?.id;
       if (!userId) throw new Error("로그인이 필요합니다.");
 
-      // 1) AI로 sub_info 생성
-      const { data: descData, error: descError } =
-        await supabase.functions.invoke("generate-persona-description", {
-          body: { answers: finalAnswers, promptKeywords, additionalInfo },
-        });
-      if (descError) throw descError;
-      const subInfo: string = descData.description;
-
-      // 2) personas INSERT
+      // 1) personas INSERT
+      //    sub_info: 유저가 직접 입력한 한줄 설명 (additionalInfo)
+      //    extra_info: 유저 입력 정보 + 프롬프트 키워드 통합
       const persona = await createPersona({
         name,
         title,
-        subInfo,
-        extraInfo: subInfos,
+        subInfo: additionalInfo ?? "",
+        extraInfo: mergedExtraInfo,
         profileImgPath: null,
         userId,
       });
 
-      // 3) 프로필 이미지 처리
+      // 2) 프로필 이미지 처리
       let profileImgUrl: string | null = null;
 
       if (autoGenerate) {
-        // AI 이미지 생성 (Edge Function 내부에서 스토리지 저장 + DB 업데이트까지 완료)
+        // AI 이미지 생성
+        // extra_info 안에 __mood__ 등 키워드가 포함되어 있으므로 그대로 전달
         const { data: imgData, error: imgError } =
           await supabase.functions.invoke("generate-persona-image", {
             body: {
-              promptKeywords,
               userId,
               personaId: persona.id,
-              personaName: name,
+              name,
+              title,
+              subInfo: additionalInfo ?? "",
+              extraInfo: mergedExtraInfo,
             },
           });
         if (imgError) throw imgError;
@@ -152,7 +154,6 @@ export function useQuizStep() {
           personaId: persona.id,
         });
 
-        // 유저 업로드의 경우 Edge Function을 거치지 않으므로 직접 DB 업데이트
         if (profileImgUrl) {
           await supabase
             .from("personas")
@@ -161,18 +162,17 @@ export function useQuizStep() {
         }
       }
 
-      // 4) 완료
+      // 3) 완료
       sessionStorage.removeItem("personaFormStep1");
       navigate("/main");
     } catch (e) {
-      console.error("페르소나 생성 실패:", JSON.stringify(e, null, 2)); // ← JSON.stringify로 변경
+      console.error("페르소나 생성 실패:", JSON.stringify(e, null, 2));
       alert("페르소나 생성 중 오류가 발생했습니다.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Enter 키로 다음 단계
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Enter" && canProceed && !editingCustom) {

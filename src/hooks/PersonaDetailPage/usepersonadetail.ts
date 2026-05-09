@@ -11,6 +11,7 @@ import {
   updatePersonaSubInfo,
 } from "../../api/personaDetail";
 import { getDisks, getEpisodesByPersonaId } from "../../api/episodes";
+import { deletePersona } from "../../api/persona";
 
 export function usePersonaDetail() {
   const { id } = useParams<{ id: string }>();
@@ -256,6 +257,19 @@ export function usePersonaDetail() {
     setIsEditingProfile(false);
   };
 
+  //페르소나 삭제
+  const handleDelete = async () => {
+    if (!id || !persona || !userId) return;
+
+    try {
+      await deletePersona(id, userId); // userId 추가
+      navigate("/main");
+    } catch (e) {
+      console.error("페르소나 삭제 실패:", e);
+      alert("삭제 중 오류가 발생했습니다.");
+    }
+  };
+
   const handleGoCreateEpisode = () => {
     navigate(`/persona/${id}/episode/create`);
   };
@@ -324,9 +338,10 @@ export function usePersonaDetail() {
     handleExtraInfoRemove,
     handleExtraInfoAdd,
 
-    // 저장 / 취소
+    // 저장 / 취소 / 삭제
     handleAllSave,
     handleAllCancel,
+    handleDelete,
     handleSubInfoSave,
 
     handleSubInfoCancel,

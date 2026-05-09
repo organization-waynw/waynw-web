@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import { EpisodeSection } from "../components/PersonaDetailPage/Episodesection";
 import { PersonaDetailHeader } from "../components/PersonaDetailPage/Personadetailheader";
 import { ProfileCard } from "../components/PersonaDetailPage/Profilecard";
@@ -5,23 +6,37 @@ import { SubInfoCard } from "../components/PersonaDetailPage/Subinfocard";
 import { usePersonaDetail } from "../hooks/PersonaDetailPage/usepersonadetail";
 
 function PersonaDetailPage() {
+  const [deleteReady, setDeleteReady] = useState(false);
+  const deleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleDeleteClick = () => {
+    if (deleteReady) {
+      // 두 번째 클릭 → 실제 삭제
+      handleDelete();
+      setDeleteReady(false);
+      if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current);
+    } else {
+      // 첫 번째 클릭 → 3초 대기
+      setDeleteReady(true);
+      deleteTimerRef.current = setTimeout(() => {
+        setDeleteReady(false);
+      }, 3000);
+    }
+  };
+
   const {
     persona,
     navigate,
     loading,
 
-    // 프로필 + 추가정보 수정
     isEditingProfile,
     setIsEditingProfile,
 
     editedName,
     setEditedName,
-
     editedTitle,
     setEditedTitle,
-
     displayImg,
-
     handleProfileImageChange,
 
     editedExtraInfo,
@@ -32,28 +47,23 @@ function PersonaDetailPage() {
     handleAllSave,
     handleAllCancel,
 
-    // 부가정보 수정
     isEditingSubInfo,
     setIsEditingSubInfo,
-
     editedSubInfo,
     setEditedSubInfo,
-
     handleSubInfoSave,
     handleSubInfoCancel,
 
-    // 에피소드
     searchQuery,
     setSearchQuery,
-
     selectedDiskColor,
     setSelectedDiskColor,
-
     filteredEpisodes,
     activeDiskColors,
-
     handleGoCreateEpisode,
     handleGoEpisodeDetail,
+
+    handleDelete, // ← 추가
   } = usePersonaDetail();
 
   if (loading) {
@@ -77,7 +87,6 @@ function PersonaDetailPage() {
       <PersonaDetailHeader onBack={() => navigate("/main")} />
 
       <main className="px-6 py-8 mx-auto space-y-6 max-w-7xl">
-        {/* 상단 2열 */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <ProfileCard
             isEditing={isEditingProfile}
@@ -106,7 +115,6 @@ function PersonaDetailPage() {
           />
         </div>
 
-        {/* 에피소드 섹션 */}
         <EpisodeSection
           searchQuery={searchQuery}
           selectedDiskColor={selectedDiskColor}
@@ -119,15 +127,26 @@ function PersonaDetailPage() {
         />
       </main>
 
+      {/* 삭제 버튼 — 우측 하단 고정 */}
+      <button
+        onClick={handleDeleteClick}
+        className={`
+          fixed bottom-6 right-6 text-white font-semibold px-6 py-3 rounded-full shadow-lg
+          transition-all duration-300 ease-in-out
+          ${
+            deleteReady
+              ? "bg-red-600 scale-110 ring-4 ring-red-300"
+              : "bg-red-500 hover:bg-red-600 scale-100"
+          }
+        `}
+      >
+        {deleteReady ? "한 번 더 누르면 삭제" : "삭제"}
+      </button>
+
       <style>{`
         @keyframes diskSpin {
-          from {
-            transform: rotate(0deg);
-          }
-
-          to {
-            transform: rotate(360deg);
-          }
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
       `}</style>
     </div>

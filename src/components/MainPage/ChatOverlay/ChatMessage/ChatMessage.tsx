@@ -1,4 +1,4 @@
-import { formatTime, Message } from "../../../../types/Chat/chat";
+import { formatTime, Message } from "../../../../types/Chat/Chat";
 import renderMessageText from "./renderMessageText";
 
 interface ChatMessageProps {

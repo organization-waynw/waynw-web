@@ -3,10 +3,7 @@ import SignupForm from "../components/auth/SignupPage/SignupForm";
 
 function SignupPage() {
   return (
-    <AuthLayout
-      title={`회원가입하고\n최적의 모니터링 환경을\n경험하세요.`}
-      subtitle={`Mobile Performance\nManagement Solution`}
-    >
+    <AuthLayout title={`회원가입하고\n대화를 연습해보세요.`} subtitle={""}>
       <SignupForm />
     </AuthLayout>
   );

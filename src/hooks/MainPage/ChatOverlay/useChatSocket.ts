@@ -62,11 +62,13 @@ export function useChatSocket(url: string) {
       };
 
       ws.onclose = () => {
+        if (closed) return;
         console.log("[WS] closed", ws.readyState);
         setIsConnected(false);
       };
 
       ws.onerror = (e) => {
+        if (closed) return;
         console.error("[WS] error", e);
       };
     };

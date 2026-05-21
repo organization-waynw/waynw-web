@@ -1,5 +1,5 @@
 import ReactMarkdown from "react-markdown";
-import { COMMAND_LABELS } from "../../../../types/Chat/chat";
+import { COMMAND_LABELS } from "../../../../types/Chat/Chat";
 
 export default function renderMessageText(text: string) {
   const commandMatch = COMMAND_LABELS.find((cmd) => text.startsWith(cmd));

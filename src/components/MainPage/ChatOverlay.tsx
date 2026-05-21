@@ -13,7 +13,7 @@ interface ChatOverlayProps {
   onClose: () => void;
 }
 
-export const WS_URL = import.meta.env.VITE_WS_URL || "ws://localhost:8080";
+const WS_URL = import.meta.env.VITE_WS_URL || "ws://localhost:8080";
 
 export default function ChatOverlay({
   personaId,
@@ -73,6 +73,12 @@ export default function ChatOverlay({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // ── 오버레이 닫기 (페이드 아웃 후 onClose 호출) ──
+  const handleClose = useCallback(() => {
+    setVisible(false);
+    setTimeout(onClose, 350);
+  }, [onClose]);
+
   // ── 페이지 이탈 방지 (메시지 있을 때) ────────────
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
@@ -96,13 +102,7 @@ export default function ChatOverlay({
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [showModal]);
-
-  // ── 오버레이 닫기 (페이드 아웃 후 onClose 호출) ──
-  const handleClose = useCallback(() => {
-    setVisible(false);
-    setTimeout(onClose, 350);
-  }, [onClose]);
+  }, [handleClose, showModal]);
 
   // ── 메시지 전송 ───────────────────────────────────
   const handleSend = () => {

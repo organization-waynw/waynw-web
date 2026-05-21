@@ -32,17 +32,15 @@ export function useChatSend(params: {
         timestamp: new Date(),
       };
 
-      setMessages((prev) => {
-        const next = [...prev, userMsg];
-        ws.send(
-          JSON.stringify({
-            type: "chat",
-            personaId,
-            messages: next.map((m) => ({ role: m.role, text: m.text })),
-          }),
-        );
-        return next;
-      });
+      const nextMessages = [...messages, userMsg];
+      setMessages(nextMessages);
+      ws.send(
+        JSON.stringify({
+          type: "chat",
+          personaId,
+          messages: nextMessages.map((m) => ({ role: m.role, text: m.text })),
+        }),
+      );
 
       resetInput();
       closeCommand();
@@ -66,14 +64,14 @@ export function useChatSend(params: {
         isSendingRef.current = false;
       }, 0);
     },
-    [isStreaming, personaId, onOveruse],
+    [isStreaming, messages, onOveruse, personaId, setMessages, wsRef],
   );
 
   const abort = useCallback(() => {
     const ws = wsRef.current;
     if (!ws || ws.readyState !== WebSocket.OPEN) return;
     ws.send(JSON.stringify({ type: "abort" }));
-  }, []);
+  }, [wsRef]);
 
   return { sendMessage, abort };
 }

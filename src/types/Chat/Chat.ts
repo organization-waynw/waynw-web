@@ -25,6 +25,11 @@ export const COMMANDS: Command[] = [
     value: "/feedback",
   },
   { label: "/intention", description: "조언을 구해요", value: "/intention" },
+  {
+    label: "/question",
+    description: "상담 선생님께 드릴 질문을 정리해요",
+    value: "/question",
+  },
 ];
 
 export const COMMAND_LABELS = COMMANDS.map((c) => c.label);

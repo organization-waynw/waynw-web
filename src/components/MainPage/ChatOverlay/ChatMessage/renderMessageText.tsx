@@ -1,27 +1,6 @@
 import ReactMarkdown from "react-markdown";
-import { COMMAND_LABELS } from "../../../../types/Chat/Chat";
 
 export default function renderMessageText(text: string) {
-  const commandMatch = COMMAND_LABELS.find((cmd) => text.startsWith(cmd));
-  if (commandMatch) {
-    const rest = text.slice(commandMatch.length);
-    return (
-      <>
-        <span className="text-[#1a56db] font-bold font-mono text-[13px]">
-          {commandMatch}
-        </span>
-        {rest && (
-          <div className="inline">
-            <ReactMarkdown
-              components={{ p: ({ children }) => <span>{children}</span> }}
-            >
-              {rest}
-            </ReactMarkdown>
-          </div>
-        )}
-      </>
-    );
-  }
   return (
     <div>
       <ReactMarkdown
@@ -48,6 +27,16 @@ export default function renderMessageText(text: string) {
             <code className="px-1 py-0.5 bg-black/10 rounded text-[12px] font-mono">
               {children}
             </code>
+          ),
+          a: ({ children, href }) => (
+            <a
+              href={href}
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-[#1a56db] underline underline-offset-2"
+            >
+              {children}
+            </a>
           ),
           blockquote: ({ children }) => (
             <blockquote className="pl-3 italic text-gray-600 border-l-2 border-gray-400">

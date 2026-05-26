@@ -36,7 +36,11 @@ export default function ChatMessage({
             : "bg-[#f0f0f0] text-[#1a1a1a] rounded-[18px_18px_18px_4px]"
         }`}
       >
-        {renderMessageText(message.text)}
+        {isUser ? (
+          <span className="whitespace-pre-wrap">{message.text}</span>
+        ) : (
+          renderMessageText(message.text)
+        )}
         {isStreaming && (
           <span className="inline-block w-[2px] h-[14px] bg-gray-500 ml-0.5 animate-pulse align-middle" />
         )}

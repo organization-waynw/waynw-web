@@ -30,7 +30,7 @@ export default function ChatMessage({
       className={`flex flex-col mb-2 animate-fadeSlideIn ${isUser ? "items-end" : "items-start"}`}
     >
       <div
-        className={`max-w-[72%] p-[10px_14px] text-[14px] leading-[1.55] break-words ${
+        className={`max-w-[82%] p-[14px_18px] text-[16px] leading-[1.7] break-words ${
           isUser
             ? "bg-[#FEE500] text-[#1a1a1a] rounded-[18px_18px_4px_18px]"
             : "bg-[#f0f0f0] text-[#1a1a1a] rounded-[18px_18px_18px_4px]"

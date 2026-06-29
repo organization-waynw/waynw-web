@@ -89,7 +89,7 @@ export async function uploadProfileImage(params: {
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
 
-  const filePath = `${userId}/${personaId}/${crypto.randomUUID()}.png`;
+  const filePath = `private/${userId}/${personaId}/${crypto.randomUUID()}.png`;
 
   const { error } = await supabase.storage
     .from("persona_profile_img")

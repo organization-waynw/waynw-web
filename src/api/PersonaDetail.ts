@@ -21,7 +21,8 @@ async function uploadProfileImageInternal(params: {
   const { base64, userId, personaId } = params;
 
   const bytes = base64ToBytes(base64);
-  const filePath = `${userId}/${personaId}/${crypto.randomUUID()}.png`;
+  const fileName = `profile-${Date.now()}.png`;
+  const filePath = `private/${userId}/${personaId}/${fileName}`;
 
   const { error } = await supabase.storage
     .from("persona_profile_img")
@@ -104,8 +105,7 @@ export async function updatePersonaProfile(params: {
   profileImgBase64?: string | null;
   userId: string;
 }): Promise<string | null> {
-  const { personaId, name, title, profileImgBase64, userId } =
-    params;
+  const { personaId, name, title, profileImgBase64, userId } = params;
 
   let profileImgPath: string | null = null;
 
